@@ -9,6 +9,14 @@ namespace PaxAndromeda.Instar.Commands;
 
 public class PageCommand : InteractionModuleBase<SocketInteractionContext>
 {
+#if DEBUG
+    private const ulong StaffRole = 985521877122428978;
+    private const ulong CommunityManagerRole = 1113478706250395759;
+#else
+    private const ulong StaffRole = 793607635608928257;
+    private const ulong CommunityManagerRole = 957411837920567356;
+#endif
+
     private readonly Dictionary<ulong, Team> _teams;
 
     public PageCommand(IConfiguration config)
@@ -23,43 +31,33 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
 
     [UsedImplicitly]
     [SlashCommand("page", "This command initiates a directed page.")]
-#if DEBUG
-    [RequireRole(985521877122428978, Group = "Staff")] // Staff role
-    [RequireRole(1113478706250395759, Group = "Staff")] // Community Manager role
-#else
-    [RequireRole(793607635608928257, Group = "Staff")] // Staff role
-    [RequireRole(957411837920567356, Group = "Staff")] // Community Manager role
-#endif
-    [DefaultMemberPermissions(GuildPermission.MuteMembers)] // Stupid way to hide this command for unauthorized personnel
+    [RequireRole(StaffRole, Group = "Staff")]
+    [RequireRole(CommunityManagerRole, Group = "Staff")]
+    [DefaultMemberPermissions(GuildPermission
+        .MuteMembers)] // Stupid way to hide this command for unauthorized personnel
     public async Task Page(
         [Summary("team", "The team you wish to page.")]
         PageTarget team,
-
-        [MinLength(12)]
-        [Summary("reason", "The reason for the page.")]
+        [MinLength(12)] [Summary("reason", "The reason for the page.")]
         string reason,
-
         [Summary("teamlead", "Do you wish to page the team lead for the team you selected?")]
         bool teamLead = false,
-
         [Summary("message", "A message link related to the reason you're paging.")]
         string message = "",
-
         [Summary("user", "The user you are paging about.")]
         IUser? user = null,
-
         [Summary("channel", "The channel you are paging about.")]
         IChannel? channel = null)
     {
         try
         {
             Log.Verbose("User {User} is attempting to page {Team}: {Reason}", Context.User.Id, team, reason);
-            
+
             if (Context.User is not IGuildUser guildUser)
                 throw new InvalidStateException("Context.User was not an IGuildUser");
 
-            Team? userTeam = GetUserPrimaryStaffTeam(guildUser);
-            if (!CheckPermissions(guildUser, userTeam, team, teamLead, out string? response))
+            var userTeam = GetUserPrimaryStaffTeam(guildUser);
+            if (!CheckPermissions(guildUser, userTeam, team, teamLead, out var response))
             {
                 await RespondAsync(response, ephemeral: true);
                 return;
@@ -75,7 +73,7 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
 
 
             await RespondAsync(
-                text: mention,
+                mention,
                 embed: BuildEmbed(reason, message, user, channel, userTeam!, guildUser),
                 allowedMentions: AllowedMentions.All);
         }
@@ -88,18 +86,18 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
 
     private string GetTeamLeadMention(PageTarget pageTarget)
     {
-        StringBuilder pingBuilder = new();
-        foreach (ulong teamId in pageTarget.GetTeamIDs())
+        var pingBuilder = new StringBuilder();
+        foreach (var teamId in pageTarget.GetTeamIDs())
         {
             if (!_teams.ContainsKey(teamId))
                 throw new InvalidStateException(
                     "Failed to determine page targets due to misconfigured PageTarget enum for team ID " + teamId);
 
-            Team team = _teams[teamId];
+            var team = _teams[teamId];
             pingBuilder.Append($"<@{team.Teamleader}> ");
         }
 
-        string target = pingBuilder.ToString();
+        var target = pingBuilder.ToString();
 
         return target.Length == 0 ? target : target[..^1];
     }
@@ -107,28 +105,28 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
     private static string GetTeamMention(PageTarget pageTarget)
     {
         StringBuilder pingBuilder = new();
-        foreach (ulong teamId in pageTarget.GetTeamIDs())
+        foreach (var teamId in pageTarget.GetTeamIDs())
             pingBuilder.Append($"<@&{teamId}> ");
 
-        string target = pingBuilder.ToString();
+        var target = pingBuilder.ToString();
 
         return target.Length == 0 ? target : target[..^1];
     }
 
     /// <summary>
-    /// Determine's the <paramref name="user"/>'s highest staff team, if they are staff.
+    ///     Determines the <paramref name="user" />'s highest staff team, if they are staff.
     /// </summary>
     /// <param name="user">The user in question</param>
     /// <returns>The user's highest staff team, or null if the user is not staff.</returns>
     private Team? GetUserPrimaryStaffTeam(IGuildUser user)
     {
         Team? highestTeam = null;
-        foreach (ulong roleId in user.RoleIds)
+        foreach (var roleId in user.RoleIds)
         {
             if (!_teams.ContainsKey(roleId))
                 continue;
 
-            Team st = _teams[roleId];
+            var st = _teams[roleId];
 
             // Set the team if it is null
             highestTeam ??= st;
@@ -140,7 +138,7 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
     }
 
     /// <summary>
-    /// Determines whether a <paramref name="user"/> has the authority to issue a page to <paramref name="pageTarget"/>.
+    ///     Determines whether a <paramref name="user" /> has the authority to issue a page to <paramref name="pageTarget" />.
     /// </summary>
     /// <param name="user">The user attempting to issue a page</param>
     /// <param name="team">The user's staff team</param>
@@ -148,7 +146,8 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
     /// <param name="teamLead">Whether the user is attempting to page the team's team leader</param>
     /// <param name="response">A response string to show to the user if they are not authorized to send a page.</param>
     /// <returns>A boolean indicating whether the user has permissions to send this page.</returns>
-    private static bool CheckPermissions(IGuildUser user, Team? team, PageTarget pageTarget, bool teamLead, out string? response)
+    private static bool CheckPermissions(IGuildUser user, Team? team, PageTarget pageTarget, bool teamLead,
+        out string? response)
     {
         response = null;
 
@@ -162,7 +161,7 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
         if (pageTarget == PageTarget.Test)
             return true;
 
-            // Check permissions.  Only mod+ can send an "all" page
+        // Check permissions.  Only mod+ can send an "all" page
         if (team.Priority > 3 && pageTarget == PageTarget.All) // i.e. Helper, Community Manager
         {
             response = "You are not authorized to send a page to the entire staff team.";
@@ -170,17 +169,16 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
             return false;
         }
 
-        if (pageTarget == PageTarget.All && teamLead)
-        {
-            response = "Failed to send page.  The 'All' team does not have a teamleader.  If intended to page the owner, please select the Owner as the team.";
-            return false;
-        }
-        
-        return true;
+        if (pageTarget != PageTarget.All || !teamLead)
+            return true;
+
+        response =
+            "Failed to send page.  The 'All' team does not have a teamleader.  If intended to page the owner, please select the Owner as the team.";
+        return false;
     }
 
     /// <summary>
-    /// Builds the page embed.
+    ///     Builds the page embed.
     /// </summary>
     /// <param name="reason">The reason for the page.</param>
     /// <param name="message">A message link.  May be null.</param>
@@ -191,9 +189,9 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
     /// <returns>A standard embed embodying all parameters provided</returns>
     private static Embed BuildEmbed(
         string reason,
-        string message, 
+        string message,
         IUser? targetUser,
-        IChannel? channel, 
+        IChannel? channel,
         Team userTeam,
         IGuildUser pagingUser)
     {
@@ -207,8 +205,8 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
 
         if (!string.IsNullOrEmpty(message))
             fields.Add(new EmbedFieldBuilder().WithIsInline(true).WithName("Message").WithValue(message));
-        
-        EmbedBuilder builder = new EmbedBuilder()
+
+        var builder = new EmbedBuilder()
             // Set up all the basic stuff first
             .WithCurrentTimestamp()
             .WithColor(userTeam.Color)
@@ -220,7 +218,7 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
             .WithDescription($"```{reason}```")
             .WithFields(fields);
 
-        Embed embed = builder.Build();
+        var embed = builder.Build();
         return embed;
     }
 }

@@ -4,41 +4,49 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using PaxAndromeda.Instar.Modals;
-using System.Threading.Channels;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
 public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>, IContextCommand
 {
-    private const string ModalID = "respond_modal";
+    private const string ModalId = "respond_modal";
 
-    public string Name => "Report Message";
+    private static readonly MemoryCache Cache = new("User Report Cache");
     private readonly ulong _staffAnnounceChannel;
-
-    private static readonly MemoryCache _cache = new("User Report Cache"); 
 
     public ReportUserCommand(IConfiguration config)
     {
         _staffAnnounceChannel = config.GetValue<ulong>("StaffAnnounceChannel");
     }
 
+    public string Name => "Report Message";
+
     public async Task HandleCommand(SocketMessageCommand arg)
     {
         // Cache the message the user is trying to report
-        _cache.Set(arg.User.Id.ToString(), arg.Data.Message,
+        Cache.Set(arg.User.Id.ToString(), arg.Data.Message,
             new CacheItemPolicy
             {
                 SlidingExpiration = TimeSpan.FromMinutes(5)
             });
 
-        await arg.RespondWithModalAsync<ReportMessageModal>(ModalID);
+        await arg.RespondWithModalAsync<ReportMessageModal>(ModalId);
     }
 
-    [ModalInteraction(ModalID)]
+    public MessageCommandProperties CreateCommand()
+    {
+        Log.Verbose("Registering ReportUserCommand...");
+        var reportMessageCommand = new MessageCommandBuilder()
+            .WithName(Name);
+
+        return reportMessageCommand.Build();
+    }
+
+    [ModalInteraction(ModalId)]
     public async Task ModalResponse(ReportMessageModal modal)
     {
-        SocketMessage? message = (SocketMessage) _cache.Get(Context.User.Id.ToString());
+        var message = (SocketMessage)Cache.Get(Context.User.Id.ToString());
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (message == null)
         {
@@ -47,13 +55,12 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
         }
 
         await SendReportMessage(modal, message, Context.Guild);
-        
+
         await RespondAsync("Your report has been sent.", ephemeral: true);
     }
 
     private async Task SendReportMessage(ReportMessageModal modal, SocketMessage message, SocketGuild guild)
     {
-
         var fields = new List<EmbedFieldBuilder>
         {
             new EmbedFieldBuilder()
@@ -82,7 +89,7 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
         fields.Add(new EmbedFieldBuilder().WithIsInline(false).WithName("Reported By")
             .WithValue($"<@{Context.User.Id}>"));
 
-        EmbedBuilder builder = new EmbedBuilder()
+        var builder = new EmbedBuilder()
             // Set up all the basic stuff first
             .WithCurrentTimestamp()
             .WithColor(0x0c94e0)
@@ -101,14 +108,5 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
         await
             Context.Guild.GetTextChannel(_staffAnnounceChannel)
                 .SendMessageAsync(staffPing, embed: builder.Build());
-    }
-
-    public MessageCommandProperties CreateCommand()
-    {
-        Log.Verbose("Registering ReportUserCommand...");
-        var reportMessageCommand = new MessageCommandBuilder()
-            .WithName(Name);
-
-        return reportMessageCommand.Build();
     }
 }

@@ -3,57 +3,54 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PaxAndromeda.Instar.Commands;
 using Serilog;
 using Serilog.Events;
-using System.Windows.Input;
-using PaxAndromeda.Instar.Commands;
 
 namespace PaxAndromeda.Instar.Services;
 
 public class DiscordService
 {
-    private readonly IServiceProvider _provider;
-    private DiscordSocketClient socketClient;
-    private InteractionService interactionService;
-    
     private readonly string _botToken;
-    private readonly ulong _guild;
-    private readonly ulong _channel;
 
     private readonly Dictionary<string, IContextCommand> _contextCommands;
+    private readonly ulong _guild;
+    private readonly InteractionService _interactionService;
+    private readonly IServiceProvider _provider;
+    private readonly DiscordSocketClient _socketClient;
 
     public DiscordService(IServiceProvider provider, IConfiguration config)
     {
         _provider = provider;
 
-        socketClient = new DiscordSocketClient(new DiscordSocketConfig
+        _socketClient = new DiscordSocketClient(new DiscordSocketConfig
         {
-            GatewayIntents = GatewayIntents.GuildMembers | GatewayIntents.Guilds | GatewayIntents.AllUnprivileged,
-            LogLevel = LogSeverity.Verbose
+            // All privileges except for GuildScheduledEvents and GuildInvites.
+            // This is written to prevent warnings about these two privileges.
+            GatewayIntents = GatewayIntents.AllUnprivileged
+                             & ~(GatewayIntents.GuildScheduledEvents | GatewayIntents.GuildInvites),
+            LogLevel = LogSeverity.Debug
         });
 
-        interactionService = new InteractionService(socketClient, new InteractionServiceConfig
+        _interactionService = new InteractionService(_socketClient, new InteractionServiceConfig
         {
-            LogLevel = LogSeverity.Verbose,
+            LogLevel = LogSeverity.Debug,
             ThrowOnError = true
         });
 
-        socketClient.Log += HandleDiscordLog;
-        socketClient.InteractionCreated += HandleInteraction;
-        socketClient.MessageCommandExecuted += HandleMessageCommand;
-        interactionService.Log += HandleDiscordLog;
+        _socketClient.Log += HandleDiscordLog;
+        _socketClient.InteractionCreated += HandleInteraction;
+        _socketClient.MessageCommandExecuted += HandleMessageCommand;
+        _interactionService.Log += HandleDiscordLog;
 
         _contextCommands = provider.GetServices<IContextCommand>().ToDictionary(n => n.Name, n => n);
-        
+
         _guild = config.GetValue("TargetGuild", 0ul);
-        _channel = config.GetValue("TargetChannel", 0ul);
         _botToken = config.GetValue<string>("Token") ?? string.Empty;
 
         // Validate
         if (_guild == 0)
             throw new ConfigurationException("TargetGuild is not set");
-        if (_channel == 0)
-            throw new ConfigurationException("TargetChannel is not set");
         if (string.IsNullOrEmpty(_botToken))
             throw new ConfigurationException("Token is not set");
     }
@@ -64,7 +61,8 @@ public class DiscordService
 
         if (!_contextCommands.ContainsKey(arg.CommandName))
         {
-            Log.Warning("Received message command interaction for unknown command by name {CommandName}", arg.CommandName);
+            Log.Warning("Received message command interaction for unknown command by name {CommandName}",
+                arg.CommandName);
             return;
         }
 
@@ -76,11 +74,13 @@ public class DiscordService
         try
         {
             // Create an execution context that matches the generic type parameter of your InteractionModuleBase<T> modules
-            var ctx = new SocketInteractionContext(socketClient, arg);
+            var ctx = new SocketInteractionContext(_socketClient, arg);
 
-            Log.Verbose("Handling interaction of type {InteractionType} with ID {InteractionID} from user {UserName} ({UserID})", ctx.Interaction.Type, ctx.Interaction.Id, ctx.User.Username, ctx.User.Id);
+            Log.Verbose(
+                "Handling interaction of type {InteractionType} with ID {InteractionID} from user {UserName} ({UserID})",
+                ctx.Interaction.Type, ctx.Interaction.Id, ctx.User.Username, ctx.User.Id);
 
-            await interactionService.ExecuteCommandAsync(ctx, _provider);
+            await _interactionService.ExecuteCommandAsync(ctx, _provider);
         }
         catch (Exception ex)
         {
@@ -97,22 +97,29 @@ public class DiscordService
     {
         Log.Information("Attempting to connect to Discord...");
 
-        socketClient.Ready += async () =>
+        _socketClient.Ready += async () =>
         {
             Log.Information("Discord client is ready");
-            await interactionService.AddModulesAsync(typeof(DiscordService).Assembly, provider);
-            await interactionService.RegisterCommandsGloballyAsync();
+            await _interactionService.AddModulesAsync(typeof(DiscordService).Assembly, provider);
+
+            Log.Information("Registering commands...");
+            var result = await _interactionService.RegisterCommandsToGuildAsync(_guild);
+
+            foreach (var globalCmd in result)
+                Log.Information(
+                    "Registered command {CommandName} with ID {CommandID} and default permission {DefaultPerm}",
+                    globalCmd.Name, globalCmd.Id, globalCmd.DefaultMemberPermissions);
 
             var props = _contextCommands.Values.Select(n => n.CreateCommand())
                 .Cast<ApplicationCommandProperties>().ToArray();
 
-            await socketClient.BulkOverwriteGlobalApplicationCommandsAsync(props);
+            await _socketClient.BulkOverwriteGlobalApplicationCommandsAsync(props);
         };
 
         Log.Verbose("Attempting login...");
-        await socketClient.LoginAsync(TokenType.Bot, _botToken);
+        await _socketClient.LoginAsync(TokenType.Bot, _botToken);
         Log.Verbose("Starting Discord...");
-        await socketClient.StartAsync();
+        await _socketClient.StartAsync();
     }
 
     private static Task HandleDiscordLog(LogMessage arg)
@@ -135,7 +142,7 @@ public class DiscordService
     public async Task Stop()
     {
         Log.Information("Stopping!");
-        await socketClient.StopAsync();
-        await socketClient.LogoutAsync();
+        await _socketClient.StopAsync();
+        await _socketClient.LogoutAsync();
     }
 }

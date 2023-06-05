@@ -6,13 +6,6 @@ namespace PaxAndromeda.Instar.Commands;
 
 public class PingCommand : InteractionModuleBase<SocketInteractionContext>
 {
-    public string Name { get; }
-
-    public PingCommand()
-    {
-        Name = "ping";
-    }
-
     [UsedImplicitly]
     [RequireOwner]
     [DefaultMemberPermissions(GuildPermission.Administrator)]

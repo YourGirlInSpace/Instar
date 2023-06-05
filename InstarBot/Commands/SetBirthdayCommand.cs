@@ -1,17 +1,15 @@
-﻿using Discord.WebSocket;
-using Discord;
-using Serilog;
+﻿using Discord;
 using Discord.Interactions;
+using Discord.WebSocket;
 using JetBrains.Annotations;
+using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
 public class SetBirthdayCommand : InteractionModuleBase<SocketInteractionContext>
 {
-    public string Name { get; }
-
     /// <summary>
-    /// Simple mapping from month number to month name.
+    ///     Simple mapping from month number to month name.
     /// </summary>
     private static readonly Dictionary<int, string> MonthNameMap = new()
     {
@@ -29,30 +27,25 @@ public class SetBirthdayCommand : InteractionModuleBase<SocketInteractionContext
         { 12, "December" }
     };
 
-    public SetBirthdayCommand()
-    {
-        Name = "setbirthday";
-    }
-
 
     [UsedImplicitly]
     [RequireOwner]
     [DefaultMemberPermissions(GuildPermission.Administrator)]
     [SlashCommand("setbirthday", "Sets your birthday on the server.")]
     public async Task SetBirthday(
-        [MinValue(1), MaxValue(12), Summary(description: "The month you were born.")]
+        [MinValue(1)] [MaxValue(12)] [Summary(description: "The month you were born.")]
         Month month,
-
-        [MinValue(1), MaxValue(31), Summary(description: "The day you were born.")]
+        [MinValue(1)] [MaxValue(31)] [Summary(description: "The day you were born.")]
         int day,
-
-        [MinValue(1900), MaxValue(2099), Summary(description: "The year you were born.")]
+        [MinValue(1900)] [MaxValue(2099)] [Summary(description: "The year you were born.")]
         int year,
-
-        [MinValue(-12), MaxValue(+12), Summary("timezone", "Select your nearest time zone offset in hours from GMT."), Autocomplete]
+        [MinValue(-12)]
+        [MaxValue(+12)]
+        [Summary("timezone", "Select your nearest time zone offset in hours from GMT.")]
+        [Autocomplete]
         int tzOffset = 0)
     {
-        int daysInMonth = DateTime.DaysInMonth(year, (int)month);
+        var daysInMonth = DateTime.DaysInMonth(year, (int)month);
 
         // First step:  Does the provided number of days exceed the number of days in the given month?
         if (day > daysInMonth)
@@ -63,14 +56,14 @@ public class SetBirthdayCommand : InteractionModuleBase<SocketInteractionContext
             return;
         }
 
-        DateTime dtLocal = new(year, (int)month, day, 0, 0, 0, DateTimeKind.Unspecified);
-        DateTime dtUtc = new DateTime(year, (int)month, day, 0, 0, 0, DateTimeKind.Utc).AddHours(-tzOffset);
+        var dtLocal = new DateTime(year, (int)month, day, 0, 0, 0, DateTimeKind.Unspecified);
+        var dtUtc = new DateTime(year, (int)month, day, 0, 0, 0, DateTimeKind.Utc).AddHours(-tzOffset);
 
         // Second step:  Is the provided birthday actually in the future?
         if (dtUtc > DateTime.UtcNow)
         {
             await RespondAsync(
-                $"You are not a time traveler.  Your birthday was not set.",
+                "You are not a time traveler.  Your birthday was not set.",
                 ephemeral: true);
             return;
         }
@@ -78,11 +71,9 @@ public class SetBirthdayCommand : InteractionModuleBase<SocketInteractionContext
         // Third step:  Is the user below the age of 13?
         // Note:  We will assume all years are 365.25 days to account for leap year madness.
         if (DateTime.UtcNow - dtUtc < TimeSpan.FromDays(365.25 * 13))
-        {
-            Log.Warning("User {UserID} recorded a birthday that puts their age below 13!  {UTCTime}", Context.User.Id, dtUtc);
-            // TODO:  Notify staff?
-        }
-
+            Log.Warning("User {UserID} recorded a birthday that puts their age below 13!  {UTCTime}", Context.User.Id,
+                dtUtc);
+        // TODO:  Notify staff?
         Log.Information("User {UserID} birthday set to {DateTime} (UTC time calculated as {UTCTime})", Context.User.Id,
             dtLocal, dtUtc);
 
@@ -120,7 +111,7 @@ public class SetBirthdayCommand : InteractionModuleBase<SocketInteractionContext
             new AutocompleteResult("GMT+9 Seoul, Osaka, Sapporo, Tokyo", 9),
             new AutocompleteResult("GMT+10 Canberra, Melbourne, Sydney", 10),
             new AutocompleteResult("GMT+11 Magadan, Solomon Islands, New Caledonia", 11),
-            new AutocompleteResult("GMT+12 Auckland, Wellington", 12),
+            new AutocompleteResult("GMT+12 Auckland, Wellington", 12)
         };
 
         await (Context.Interaction as SocketAutocompleteInteraction)?.RespondAsync(results)!;

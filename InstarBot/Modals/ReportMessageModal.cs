@@ -1,13 +1,15 @@
-﻿using Discord;
+﻿using System.Diagnostics.CodeAnalysis;
+using Discord;
 using Discord.Interactions;
 
 namespace PaxAndromeda.Instar.Modals;
 
+[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
 public class ReportMessageModal : IModal
 {
-    public string Title => "Report Message";
-
     [InputLabel("Why are you reporting this message?")]
-    [ModalTextInput("report_reason", TextInputStyle.Paragraph, placeholder: "Reason for reporting", minLength: 12)]
-    public string ReportReason { get; set; }
+    [ModalTextInput("report_reason", TextInputStyle.Paragraph, "Reason for reporting", 12)]
+    public string? ReportReason { get; set; }
+
+    public string Title => "Report Message";
 }

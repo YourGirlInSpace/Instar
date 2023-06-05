@@ -1,17 +1,19 @@
-﻿namespace PaxAndromeda.Instar;
+﻿using JetBrains.Annotations;
+
+namespace PaxAndromeda.Instar;
 
 public enum Month
 {
-    January = 1,
-    February = 2,
-    March = 3,
-    April = 4,
-    May = 5,
-    June = 6,
-    July = 7,
-    August = 8,
-    September = 9,
-    October = 10,
-    November = 11,
-    December = 12
+    [UsedImplicitly] January = 1,
+    [UsedImplicitly] February = 2,
+    [UsedImplicitly] March = 3,
+    [UsedImplicitly] April = 4,
+    [UsedImplicitly] May = 5,
+    [UsedImplicitly] June = 6,
+    [UsedImplicitly] July = 7,
+    [UsedImplicitly] August = 8,
+    [UsedImplicitly] September = 9,
+    [UsedImplicitly] October = 10,
+    [UsedImplicitly] November = 11,
+    [UsedImplicitly] December = 12
 }
