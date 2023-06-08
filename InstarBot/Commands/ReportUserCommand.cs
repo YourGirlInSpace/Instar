@@ -1,19 +1,26 @@
 ﻿using System.Runtime.Caching;
 using Discord;
 using Discord.Interactions;
-using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using PaxAndromeda.Instar.Modals;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
-public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>, IContextCommand
+public class ReportUserCommand : BaseCommand, IContextCommand
 {
     private const string ModalId = "respond_modal";
 
     private static readonly MemoryCache Cache = new("User Report Cache");
     private readonly ulong _staffAnnounceChannel;
+
+    internal static void PurgeCache()
+    {
+        foreach (var n in Cache)
+        {
+            Cache.Remove(n.Key, CacheEntryRemovedReason.Removed);
+        }
+    }
 
     public ReportUserCommand(IConfiguration config)
     {
@@ -22,7 +29,7 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
 
     public string Name => "Report Message";
 
-    public async Task HandleCommand(SocketMessageCommand arg)
+    public async Task HandleCommand(IInstarMessageCommandInteraction arg)
     {
         // Cache the message the user is trying to report
         Cache.Set(arg.User.Id.ToString(), arg.Data.Message,
@@ -46,7 +53,7 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
     [ModalInteraction(ModalId)]
     public async Task ModalResponse(ReportMessageModal modal)
     {
-        var message = (SocketMessage)Cache.Get(Context.User.Id.ToString());
+        var message = (IMessage)Cache.Get(GetUser()!.Id.ToString());
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (message == null)
         {
@@ -54,12 +61,12 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
             return;
         }
 
-        await SendReportMessage(modal, message, Context.Guild);
+        await SendReportMessage(modal, message, GetGuild());
 
         await RespondAsync("Your report has been sent.", ephemeral: true);
     }
 
-    private async Task SendReportMessage(ReportMessageModal modal, SocketMessage message, SocketGuild guild)
+    private async Task SendReportMessage(ReportMessageModal modal, IMessage message, IInstarGuild guild)
     {
         var fields = new List<EmbedFieldBuilder>
         {
@@ -87,7 +94,7 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
             .WithValue($"https://discord.com/channels/{guild.Id}/{message.Channel?.Id}/{message.Id}"));
 
         fields.Add(new EmbedFieldBuilder().WithIsInline(false).WithName("Reported By")
-            .WithValue($"<@{Context.User.Id}>"));
+            .WithValue($"<@{GetUser()!.Id}>"));
 
         var builder = new EmbedBuilder()
             // Set up all the basic stuff first
@@ -106,7 +113,7 @@ public class ReportUserCommand : InteractionModuleBase<SocketInteractionContext>
 #endif
 
         await
-            Context.Guild.GetTextChannel(_staffAnnounceChannel)
+            GetGuild().GetTextChannel(_staffAnnounceChannel)
                 .SendMessageAsync(staffPing, embed: builder.Build());
     }
 }

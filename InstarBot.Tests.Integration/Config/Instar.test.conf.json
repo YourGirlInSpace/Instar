@@ -1,0 +1,46 @@
+{
+  "Testing": true,
+  
+  "BotName": "Instar",
+  "TargetGuild": "789965848215420949",
+  "TargetChannel": "789965848704974900",
+  "Token": "{{DISCORD BOT TOKEN}}",
+  "StaffAnnounceChannel": 985567962524160080,
+  "Teams": [
+    {
+      "Name": "Owner",
+      "ID": 793607464833908779,
+      "Teamleader": 130082061988921344,
+      "Color": 16766721,
+      "Priority": 1
+    },
+    {
+      "Name": "Admin",
+      "ID": 985550619844694037,
+      "Teamleader": 107839904318271488,
+      "Color": 15132390,
+      "Priority": 2
+    },
+    {
+      "Name": "Moderator",
+      "ID": 820350564931338260,
+      "Teamleader": 346194980408393728,
+      "Color": 15132390,
+      "Priority": 3
+    },
+    {
+      "Name": "Helper",
+      "ID": 801889809211064390,
+      "Teamleader": 459078815314870283,
+      "Color": 13532979,
+      "Priority": 4
+    },
+    {
+      "Name": "Community Manager",
+      "ID": 957411837920567356,
+      "Teamleader": 340546691491168257,
+      "Color": 10892756,
+      "Priority": 5
+    }
+  ]
+}

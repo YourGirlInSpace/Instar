@@ -6,7 +6,7 @@ using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
-public class SetBirthdayCommand : InteractionModuleBase<SocketInteractionContext>
+public class SetBirthdayCommand : BaseCommand
 {
     /// <summary>
     ///     Simple mapping from month number to month name.
@@ -71,10 +71,10 @@ public class SetBirthdayCommand : InteractionModuleBase<SocketInteractionContext
         // Third step:  Is the user below the age of 13?
         // Note:  We will assume all years are 365.25 days to account for leap year madness.
         if (DateTime.UtcNow - dtUtc < TimeSpan.FromDays(365.25 * 13))
-            Log.Warning("User {UserID} recorded a birthday that puts their age below 13!  {UTCTime}", Context.User.Id,
+            Log.Warning("User {UserID} recorded a birthday that puts their age below 13!  {UTCTime}", GetUser()!.Id,
                 dtUtc);
         // TODO:  Notify staff?
-        Log.Information("User {UserID} birthday set to {DateTime} (UTC time calculated as {UTCTime})", Context.User.Id,
+        Log.Information("User {UserID} birthday set to {DateTime} (UTC time calculated as {UTCTime})", GetUser()!.Id,
             dtLocal, dtUtc);
 
         await RespondAsync($"Your birthday was set to {dtLocal:D}.", ephemeral: true);

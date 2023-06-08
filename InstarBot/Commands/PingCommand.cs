@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace PaxAndromeda.Instar.Commands;
 
-public class PingCommand : InteractionModuleBase<SocketInteractionContext>
+public class PingCommand : BaseCommand
 {
     [UsedImplicitly]
     [RequireOwner]

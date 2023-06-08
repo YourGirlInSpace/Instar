@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PaxAndromeda.Instar.Commands;
+using PaxAndromeda.Instar.Wrappers;
 using Serilog;
 using Serilog.Events;
 
@@ -66,7 +67,7 @@ public class DiscordService
             return;
         }
 
-        await _contextCommands[arg.CommandName].HandleCommand(arg);
+        await _contextCommands[arg.CommandName].HandleCommand(new MessageCommandInteractionWrapper(arg));
     }
 
     private async Task HandleInteraction(SocketInteraction arg)

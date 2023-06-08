@@ -5,6 +5,10 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot", "InstarBot\InstarBot.csproj", "{5663F6B4-9A4E-4007-9D2B-8552BB3645A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot.Tests", "InstarBot.Tests\InstarBot.Tests.csproj", "{765E61BC-2331-4AC2-BE0D-372F87D4B85F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot.Tests.Integration", "InstarBot.Tests.Integration\InstarBot.Tests.Integration.csproj", "{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{5663F6B4-9A4E-4007-9D2B-8552BB3645A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5663F6B4-9A4E-4007-9D2B-8552BB3645A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5663F6B4-9A4E-4007-9D2B-8552BB3645A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{765E61BC-2331-4AC2-BE0D-372F87D4B85F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{765E61BC-2331-4AC2-BE0D-372F87D4B85F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{765E61BC-2331-4AC2-BE0D-372F87D4B85F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{765E61BC-2331-4AC2-BE0D-372F87D4B85F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

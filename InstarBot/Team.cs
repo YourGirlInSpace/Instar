@@ -2,9 +2,9 @@
 
 namespace PaxAndromeda.Instar;
 
-internal abstract class Team
+public class Team
 {
-    public string Name { get; set; } = null!;
+    public string Name { get; [UsedImplicitly] set; } = null!;
 
     // ReSharper disable once InconsistentNaming
     public ulong ID { get; [UsedImplicitly] set; }

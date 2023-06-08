@@ -8,5 +8,5 @@ public class TeamIDAttribute : Attribute
         ID = id;
     }
 
-    public ulong ID { get; set; }
+    public ulong ID { get; }
 }

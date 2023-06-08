@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
@@ -7,7 +8,8 @@ using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
-public class PageCommand : InteractionModuleBase<SocketInteractionContext>
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")] // Required for mocking
+public class PageCommand : BaseCommand
 {
 #if DEBUG
     private const ulong StaffRole = 985521877122428978;
@@ -20,7 +22,7 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
     private readonly Dictionary<ulong, Team> _teams;
 
     public PageCommand(IConfiguration config)
-    {
+    { 
         var teamsConfig =
             config.GetSection("Teams").Get<List<Team>>()?
                 .ToDictionary(n => n.ID, n => n);
@@ -33,8 +35,8 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("page", "This command initiates a directed page.")]
     [RequireRole(StaffRole, Group = "Staff")]
     [RequireRole(CommunityManagerRole, Group = "Staff")]
-    [DefaultMemberPermissions(GuildPermission
-        .MuteMembers)] // Stupid way to hide this command for unauthorized personnel
+    // Stupid way to hide this command for unauthorized personnel
+    [DefaultMemberPermissions(GuildPermission.MuteMembers)]
     public async Task Page(
         [Summary("team", "The team you wish to page.")]
         PageTarget team,
@@ -49,13 +51,14 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
         [Summary("channel", "The channel you are paging about.")]
         IChannel? channel = null)
     {
+        var guildUser = GetUser();
+        if (guildUser is null)
+            throw new InvalidStateException("Context.User was not an IGuildUser");
+        
         try
         {
-            Log.Verbose("User {User} is attempting to page {Team}: {Reason}", Context.User.Id, team, reason);
-
-            if (Context.User is not IGuildUser guildUser)
-                throw new InvalidStateException("Context.User was not an IGuildUser");
-
+            Log.Verbose("User {User} is attempting to page {Team}: {Reason}", guildUser.Id, team, reason);
+            
             var userTeam = GetUserPrimaryStaffTeam(guildUser);
             if (!CheckPermissions(guildUser, userTeam, team, teamLead, out var response))
             {
@@ -71,7 +74,7 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
             else
                 mention = GetTeamMention(team);
 
-
+            Log.Debug("Emitting page to {ChannelName}", GetChannel()?.Name);
             await RespondAsync(
                 mention,
                 embed: BuildEmbed(reason, message, user, channel, userTeam!, guildUser),
@@ -79,7 +82,7 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to send page from {User}", Context.User.Id);
+            Log.Error(ex, "Failed to send page from {User}", guildUser.Id);
             await RespondAsync("Failed to process command due to an internal server error.", ephemeral: true);
         }
     }
@@ -121,10 +124,13 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
     private Team? GetUserPrimaryStaffTeam(IGuildUser user)
     {
         Team? highestTeam = null;
+        Log.Debug("User roles: {Roles}", string.Join(", ", user.RoleIds));
         foreach (var roleId in user.RoleIds)
         {
             if (!_teams.ContainsKey(roleId))
                 continue;
+            
+            Log.Debug("Team role found: {Role}", roleId);
 
             var st = _teams[roleId];
 
@@ -134,6 +140,10 @@ public class PageCommand : InteractionModuleBase<SocketInteractionContext>
                 highestTeam = st;
         }
 
+        if (highestTeam is not null)
+            Log.Debug("Highest team: {TeamID} {TeamName}", highestTeam.ID, highestTeam.Name);
+        else Log.Debug("Highest team was not found.");
+        
         return highestTeam;
     }
 
