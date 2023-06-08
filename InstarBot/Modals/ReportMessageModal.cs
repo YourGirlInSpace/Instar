@@ -1,10 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
+using JetBrains.Annotations;
 
 namespace PaxAndromeda.Instar.Modals;
 
-[SuppressMessage("ReSharper", "ClassNeverInstantiated.Global")]
+[UsedImplicitly]
 public class ReportMessageModal : IModal
 {
     [InputLabel("Why are you reporting this message?")]

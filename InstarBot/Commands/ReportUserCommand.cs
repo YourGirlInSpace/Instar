@@ -13,6 +13,9 @@ public class ReportUserCommand : BaseCommand, IContextCommand
 
     private static readonly MemoryCache Cache = new("User Report Cache");
     private readonly ulong _staffAnnounceChannel;
+#if !DEBUG
+    private readonly ulong _staffRoleId;
+#endif
 
     internal static void PurgeCache()
     {
@@ -25,6 +28,10 @@ public class ReportUserCommand : BaseCommand, IContextCommand
     public ReportUserCommand(IConfiguration config)
     {
         _staffAnnounceChannel = config.GetValue<ulong>("StaffAnnounceChannel");
+        
+#if !DEBUG
+        _staffRoleId = config.GetValue<ulong>("StaffRoleID");
+#endif
     }
 
     public string Name => "Report Message";
@@ -53,7 +60,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
     [ModalInteraction(ModalId)]
     public async Task ModalResponse(ReportMessageModal modal)
     {
-        var message = (IMessage)Cache.Get(GetUser()!.Id.ToString());
+        var message = (IMessage)Cache.Get(User!.Id.ToString());
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (message == null)
         {
@@ -61,7 +68,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
             return;
         }
 
-        await SendReportMessage(modal, message, GetGuild());
+        await SendReportMessage(modal, message, Guild);
 
         await RespondAsync("Your report has been sent.", ephemeral: true);
     }
@@ -94,7 +101,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
             .WithValue($"https://discord.com/channels/{guild.Id}/{message.Channel?.Id}/{message.Id}"));
 
         fields.Add(new EmbedFieldBuilder().WithIsInline(false).WithName("Reported By")
-            .WithValue($"<@{GetUser()!.Id}>"));
+            .WithValue($"<@{User!.Id}>"));
 
         var builder = new EmbedBuilder()
             // Set up all the basic stuff first
@@ -109,11 +116,11 @@ public class ReportUserCommand : BaseCommand, IContextCommand
 #if DEBUG
         const string staffPing = "{{staffping}}";
 #else
-        const string staffPing = "<@&793607635608928257>";
+        var staffPing = $"<@&{_staffRoleId}>";
 #endif
 
         await
-            GetGuild().GetTextChannel(_staffAnnounceChannel)
+            Guild.GetTextChannel(_staffAnnounceChannel)
                 .SendMessageAsync(staffPing, embed: builder.Build());
     }
 }

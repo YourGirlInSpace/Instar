@@ -51,16 +51,15 @@ public class PageCommand : BaseCommand
         [Summary("channel", "The channel you are paging about.")]
         IChannel? channel = null)
     {
-        var guildUser = GetUser();
-        if (guildUser is null)
+        if (User is null)
             throw new InvalidStateException("Context.User was not an IGuildUser");
         
         try
         {
-            Log.Verbose("User {User} is attempting to page {Team}: {Reason}", guildUser.Id, team, reason);
+            Log.Verbose("User {User} is attempting to page {Team}: {Reason}", User.Id, team, reason);
             
-            var userTeam = GetUserPrimaryStaffTeam(guildUser);
-            if (!CheckPermissions(guildUser, userTeam, team, teamLead, out var response))
+            var userTeam = GetUserPrimaryStaffTeam(User);
+            if (!CheckPermissions(User, userTeam, team, teamLead, out var response))
             {
                 await RespondAsync(response, ephemeral: true);
                 return;
@@ -74,15 +73,15 @@ public class PageCommand : BaseCommand
             else
                 mention = GetTeamMention(team);
 
-            Log.Debug("Emitting page to {ChannelName}", GetChannel()?.Name);
+            Log.Debug("Emitting page to {ChannelName}", Channel?.Name);
             await RespondAsync(
                 mention,
-                embed: BuildEmbed(reason, message, user, channel, userTeam!, guildUser),
+                embed: BuildEmbed(reason, message, user, channel, userTeam!, User),
                 allowedMentions: AllowedMentions.All);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to send page from {User}", guildUser.Id);
+            Log.Error(ex, "Failed to send page from {User}", User.Id);
             await RespondAsync("Failed to process command due to an internal server error.", ephemeral: true);
         }
     }

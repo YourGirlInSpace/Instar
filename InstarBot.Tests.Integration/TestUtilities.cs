@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 using PaxAndromeda.Instar;
+using PaxAndromeda.Instar.Commands;
 using Xunit;
 
 namespace InstarBot.Tests.Integration;
@@ -63,7 +64,7 @@ public static class TestUtilities
     /// <param name="ephemeral">A flag indicating whether the message should be ephemeral.</param>
     /// <typeparam name="T">The type of command.  Must implement <see cref="InteractionModuleBase&lt;T&gt;"/>.</typeparam>
     public static void VerifyMessage<T>(Mock<T> command, string message, bool ephemeral = false)
-        where T : InteractionModuleBase<SocketInteractionContext>
+        where T : BaseCommand
     {
         command.Protected().Verify(
             "RespondAsync", Times.Once(),
@@ -73,7 +74,7 @@ public static class TestUtilities
     }
 
     public static Mock<T> SetupCommandMock<T>(CommandMockContext context = null!)
-        where T : InteractionModuleBase<SocketInteractionContext>
+        where T : BaseCommand
     {
         // Quick check:  Do we have a constructor that takes IConfiguration?
         var iConfigCtor = typeof(T).GetConstructors()
@@ -85,15 +86,15 @@ public static class TestUtilities
     }
 
     private static void ConfigureCommandMock<T>(Mock<T> mock, CommandMockContext? context)
-        where T : InteractionModuleBase<SocketInteractionContext>
+        where T : BaseCommand
     {
         context ??= new CommandMockContext();
         
-        mock.Protected().Setup<IGuildUser>("GetUser").Returns(SetupUserMock<IGuildUser>(context).Object);
-        mock.Protected().Setup<IGuildChannel>("GetChannel").Returns(SetupChannelMock<ITextChannel>(context).Object);
+        mock.SetupGet<IGuildUser>(n => n.User!).Returns(SetupUserMock<IGuildUser>(context).Object);
+        mock.SetupGet<IGuildChannel>(n => n.Channel!).Returns(SetupChannelMock<ITextChannel>(context).Object);
         // Note: The following line must occur after the mocking of GetChannel.
-        mock.Protected().Setup<IInstarGuild>("GetGuild").Returns(SetupGuildMock(context).Object);
-        
+        mock.SetupGet<IInstarGuild>(n => n.Guild).Returns(SetupGuildMock(context).Object);
+
         mock.Protected().Setup<Task>("RespondAsync", ItExpr.IsNull<string>(), ItExpr.IsNull<Embed[]>(), It.IsAny<bool>(),
                 It.IsAny<bool>(), ItExpr.IsNull<AllowedMentions>(), ItExpr.IsNull<RequestOptions>(), ItExpr.IsNull<MessageComponent>(),
                 ItExpr.IsNull<Embed>())
