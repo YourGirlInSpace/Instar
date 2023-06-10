@@ -5,9 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>InstarBot.Tests</RootNamespace>
-    </PropertyGroup>
-    
-    <PropertyGroup>
+        <IsTestProject>false</IsTestProject>
         <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     </PropertyGroup>
 
