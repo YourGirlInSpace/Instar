@@ -8,26 +8,6 @@ namespace PaxAndromeda.Instar.Commands;
 
 public class SetBirthdayCommand : BaseCommand
 {
-    /// <summary>
-    ///     Simple mapping from month number to month name.
-    /// </summary>
-    private static readonly Dictionary<int, string> MonthNameMap = new()
-    {
-        { 1, "January" },
-        { 2, "February" },
-        { 3, "March" },
-        { 4, "April" },
-        { 5, "May" },
-        { 6, "June" },
-        { 7, "July" },
-        { 8, "August" },
-        { 9, "September" },
-        { 10, "October" },
-        { 11, "November" },
-        { 12, "December" }
-    };
-
-
     [UsedImplicitly]
     [RequireOwner]
     [DefaultMemberPermissions(GuildPermission.Administrator)]
@@ -51,7 +31,7 @@ public class SetBirthdayCommand : BaseCommand
         if (day > daysInMonth)
         {
             await RespondAsync(
-                $"There are only {daysInMonth} days in {MonthNameMap[(int)month]} {year}.  Your birthday was not set.",
+                $"There are only {daysInMonth} days in {month} {year}.  Your birthday was not set.",
                 ephemeral: true);
             return;
         }

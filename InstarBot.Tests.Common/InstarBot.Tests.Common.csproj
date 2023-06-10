@@ -8,20 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="FluentAssertions" Version="6.11.0" />
       <PackageReference Include="Moq" Version="4.18.4" />
+      <PackageReference Include="xunit" Version="2.4.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\InstarBot\InstarBot.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="FluentAssertions">
-        <HintPath>..\..\..\.nuget\packages\fluentassertions\6.11.0\lib\net6.0\FluentAssertions.dll</HintPath>
-      </Reference>
-      <Reference Include="xunit.assert">
-        <HintPath>..\..\..\.nuget\packages\xunit.assert\2.4.1\lib\netstandard1.1\xunit.assert.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
     <ItemGroup>
