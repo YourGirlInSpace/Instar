@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using Discord;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -23,14 +22,14 @@ public sealed class PageCommandStepDefinitions
     [Given("the user is in team (.*)")]
     public void GivenTheUserIsInTeam(PageTarget target)
     {
-        var teamId = target.GetTeamIDs().First();
-        _scenarioContext.Add("UserTeamID", teamId);
+        var team = TestUtilities.GetTeams(target).First();
+        _scenarioContext.Add("UserTeamID", team.ID);
     }
 
     [Given("the user is not a staff member")]
     public void GivenTheUserIsNotAStaffMember()
     {
-        _scenarioContext.Add("UserTeamID", 0ul);
+        _scenarioContext.Add("UserTeamID", new Snowflake());
     }
 
     [Given("the user is paging (CommunityManager|Helper|Moderator|Admin|Owner|Test|All)")]
@@ -77,8 +76,8 @@ public sealed class PageCommandStepDefinitions
             expectedString = "This is a __**TEST**__ page.";
         else
         {
-            var teamId = pageTarget.GetTeamIDs().First();
-            expectedString = $"<@&{teamId}>";
+            var team = TestUtilities.GetTeams(pageTarget).First();
+            expectedString = Snowflake.GetMention(() => team.ID);
         }
         
         command.Protected().Verify(
@@ -108,10 +107,10 @@ public sealed class PageCommandStepDefinitions
     {
         var teamsConfig =
             TestUtilities.GetTestConfiguration().GetSection("Teams").Get<List<Team>>()?
-                .ToDictionary(n => n.ID, n => n);
+                .ToDictionary(n => n.InternalID, n => n);
 
         // Eeeeeeeeeeeeevil
-        return teamsConfig![pageTarget.GetTeamIDs().First()].Teamleader;
+        return teamsConfig![pageTarget.GetAttributesOfType<TeamRefAttribute>()?.First().InternalID ?? "idkjustfail"].Teamleader;
     }
     
     [Then("Instar should emit a valid All Page embed")]
@@ -119,25 +118,25 @@ public sealed class PageCommandStepDefinitions
     {
         _scenarioContext.ContainsKey("Command").Should().BeTrue();
         var command = _scenarioContext.Get<Mock<PageCommand>>("Command");
-        StringBuilder pingBuilder = new();
-        foreach (var teamId in PageTarget.All.GetTeamIDs())
-            pingBuilder.Append($"<@&{teamId}> ");
-
-        var target = pingBuilder.ToString();
+        var expected = string.Join(' ', TestUtilities.GetTeams(PageTarget.All).Select(n => Snowflake.GetMention(() => n.ID)));
         
         command.Protected().Verify(
             "RespondAsync", Times.Once(),
-            target.Length == 0 ? target : target[..^1], ItExpr.IsNull<Embed[]>(),
+            expected, ItExpr.IsNull<Embed[]>(),
             false, false, AllowedMentions.All, ItExpr.IsNull<RequestOptions>(),
             ItExpr.IsNull<MessageComponent>(), ItExpr.IsAny<Embed>());
     }
-    
+
     private Mock<PageCommand> SetupMocks()
     {
-        var commandMock = TestUtilities.SetupCommandMock<PageCommand>(new CommandMockContext
-        {
-            UserRoles = new List<ulong> { _scenarioContext.Get<ulong>("UserTeamID") }
-        });
+        var userTeam = _scenarioContext.Get<Snowflake>("UserTeamID");
+
+        var commandMock = TestUtilities.SetupCommandMock(
+            () => new PageCommand(TestUtilities.GetTeamService()),
+            new CommandMockContext
+            {
+                UserRoles = new List<Snowflake> { userTeam }
+            });
 
         return commandMock;
     }

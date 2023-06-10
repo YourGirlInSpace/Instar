@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+using Ardalis.GuardClauses;
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Configuration;
+using PaxAndromeda.Instar.Preconditions;
+using PaxAndromeda.Instar.Services;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
@@ -11,30 +12,16 @@ namespace PaxAndromeda.Instar.Commands;
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")] // Required for mocking
 public class PageCommand : BaseCommand
 {
-#if DEBUG
-    private const ulong StaffRole = 985521877122428978;
-    private const ulong CommunityManagerRole = 1113478706250395759;
-#else
-    private const ulong StaffRole = 793607635608928257;
-    private const ulong CommunityManagerRole = 957411837920567356;
-#endif
+    private readonly TeamService _teamService;
 
-    private readonly Dictionary<ulong, Team> _teams;
-
-    public PageCommand(IConfiguration config)
-    { 
-        var teamsConfig =
-            config.GetSection("Teams").Get<List<Team>>()?
-                .ToDictionary(n => n.ID, n => n);
-
-        _teams = teamsConfig ?? throw new InvalidStateException(
-            "Instar.conf.json doesn't appear to have teams configured, or the configuration was loaded incorrectly.");
+    public PageCommand(TeamService teamService)
+    {
+        _teamService = teamService;
     }
 
     [UsedImplicitly]
     [SlashCommand("page", "This command initiates a directed page.")]
-    [RequireRole(StaffRole, Group = "Staff")]
-    [RequireRole(CommunityManagerRole, Group = "Staff")]
+    [RequireStaffMember]
     // Stupid way to hide this command for unauthorized personnel
     [DefaultMemberPermissions(GuildPermission.MuteMembers)]
     public async Task Page(
@@ -51,15 +38,15 @@ public class PageCommand : BaseCommand
         [Summary("channel", "The channel you are paging about.")]
         IChannel? channel = null)
     {
-        if (User is null)
-            throw new InvalidStateException("Context.User was not an IGuildUser");
+        Guard.Against.NullOrEmpty(reason);
+        Guard.Against.Null(Context.User);
         
         try
         {
-            Log.Verbose("User {User} is attempting to page {Team}: {Reason}", User.Id, team, reason);
+            Log.Verbose("User {User} is attempting to page {Team}: {Reason}", Context.User.Id, team, reason);
             
-            var userTeam = GetUserPrimaryStaffTeam(User);
-            if (!CheckPermissions(User, userTeam, team, teamLead, out var response))
+            var userTeam = _teamService.GetUserPrimaryStaffTeam(Context.User);
+            if (!CheckPermissions(Context.User, userTeam, team, teamLead, out var response))
             {
                 await RespondAsync(response, ephemeral: true);
                 return;
@@ -69,83 +56,23 @@ public class PageCommand : BaseCommand
             if (team == PageTarget.Test)
                 mention = "This is a __**TEST**__ page.";
             else if (teamLead)
-                mention = GetTeamLeadMention(team);
+                mention = _teamService.GetTeamLeadMention(team);
             else
-                mention = GetTeamMention(team);
+                mention = _teamService.GetTeamMention(team);
 
-            Log.Debug("Emitting page to {ChannelName}", Channel?.Name);
+            Log.Debug("Emitting page to {ChannelName}", Context.Channel?.Name);
             await RespondAsync(
                 mention,
-                embed: BuildEmbed(reason, message, user, channel, userTeam!, User),
+                embed: BuildEmbed(reason, message, user, channel, userTeam!, Context.User),
                 allowedMentions: AllowedMentions.All);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to send page from {User}", User.Id);
+            Log.Error(ex, "Failed to send page from {User}", Context.User.Id);
             await RespondAsync("Failed to process command due to an internal server error.", ephemeral: true);
         }
     }
-
-    private string GetTeamLeadMention(PageTarget pageTarget)
-    {
-        var pingBuilder = new StringBuilder();
-        foreach (var teamId in pageTarget.GetTeamIDs())
-        {
-            if (!_teams.ContainsKey(teamId))
-                throw new InvalidStateException(
-                    "Failed to determine page targets due to misconfigured PageTarget enum for team ID " + teamId);
-
-            var team = _teams[teamId];
-            pingBuilder.Append($"<@{team.Teamleader}> ");
-        }
-
-        var target = pingBuilder.ToString();
-
-        return target.Length == 0 ? target : target[..^1];
-    }
-
-    private static string GetTeamMention(PageTarget pageTarget)
-    {
-        StringBuilder pingBuilder = new();
-        foreach (var teamId in pageTarget.GetTeamIDs())
-            pingBuilder.Append($"<@&{teamId}> ");
-
-        var target = pingBuilder.ToString();
-
-        return target.Length == 0 ? target : target[..^1];
-    }
-
-    /// <summary>
-    ///     Determines the <paramref name="user" />'s highest staff team, if they are staff.
-    /// </summary>
-    /// <param name="user">The user in question</param>
-    /// <returns>The user's highest staff team, or null if the user is not staff.</returns>
-    private Team? GetUserPrimaryStaffTeam(IGuildUser user)
-    {
-        Team? highestTeam = null;
-        Log.Debug("User roles: {Roles}", string.Join(", ", user.RoleIds));
-        foreach (var roleId in user.RoleIds)
-        {
-            if (!_teams.ContainsKey(roleId))
-                continue;
-            
-            Log.Debug("Team role found: {Role}", roleId);
-
-            var st = _teams[roleId];
-
-            // Set the team if it is null
-            highestTeam ??= st;
-            if (st.Priority < highestTeam.Priority)
-                highestTeam = st;
-        }
-
-        if (highestTeam is not null)
-            Log.Debug("Highest team: {TeamID} {TeamName}", highestTeam.ID, highestTeam.Name);
-        else Log.Debug("Highest team was not found.");
-        
-        return highestTeam;
-    }
-
+    
     /// <summary>
     ///     Determines whether a <paramref name="user" /> has the authority to issue a page to <paramref name="pageTarget" />.
     /// </summary>

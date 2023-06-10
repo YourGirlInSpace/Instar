@@ -1,8 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Discord;
 using Moq;
+using PaxAndromeda.Instar;
 
-namespace InstarBot.Tests.Integration;
+namespace InstarBot.Tests;
 
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
 public class CommandMockContext
@@ -11,7 +12,7 @@ public class CommandMockContext
     public ulong ChannelID { get; init; } = 200;
     public ulong GuildID { get; init; } = 300;
 
-    public List<ulong> UserRoles { get; init; } = new();
+    public List<Snowflake> UserRoles { get; init; } = new();
 
     public Action<Embed> EmbedCallback { get; init; } = _ => { };
 

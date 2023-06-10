@@ -5,6 +5,8 @@
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
+
+        <RootNamespace>InstarBot.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\InstarBot.Tests.Common\InstarBot.Tests.Common.csproj" />
       <ProjectReference Include="..\InstarBot\InstarBot.csproj" />
     </ItemGroup>
 

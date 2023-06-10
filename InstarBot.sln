@@ -5,9 +5,13 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot", "InstarBot\InstarBot.csproj", "{5663F6B4-9A4E-4007-9D2B-8552BB3645A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot.Tests", "InstarBot.Tests\InstarBot.Tests.csproj", "{765E61BC-2331-4AC2-BE0D-372F87D4B85F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot.Tests.Unit", "InstarBot.Tests.Unit\InstarBot.Tests.Unit.csproj", "{765E61BC-2331-4AC2-BE0D-372F87D4B85F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot.Tests.Integration", "InstarBot.Tests.Integration\InstarBot.Tests.Integration.csproj", "{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstarBot.Tests.Common", "InstarBot.Tests.Common\InstarBot.Tests.Common.csproj", "{1136B00A-B649-4D85-8DF3-D506C7726EAA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{7F053D1A-E45A-4D1E-B667-9A678B46138B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,11 +31,20 @@ Global
 		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1136B00A-B649-4D85-8DF3-D506C7726EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1136B00A-B649-4D85-8DF3-D506C7726EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1136B00A-B649-4D85-8DF3-D506C7726EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1136B00A-B649-4D85-8DF3-D506C7726EAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9C6230CA-16D9-482C-8576-82F3F7D72843}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1136B00A-B649-4D85-8DF3-D506C7726EAA} = {7F053D1A-E45A-4D1E-B667-9A678B46138B}
+		{6013C4E2-F315-4F98-B9CF-8A7700F6E0EF} = {7F053D1A-E45A-4D1E-B667-9A678B46138B}
+		{765E61BC-2331-4AC2-BE0D-372F87D4B85F} = {7F053D1A-E45A-4D1E-B667-9A678B46138B}
 	EndGlobalSection
 EndGlobal

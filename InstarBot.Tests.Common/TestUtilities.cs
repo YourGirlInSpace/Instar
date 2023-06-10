@@ -1,20 +1,28 @@
+using System.Linq.Expressions;
 using Discord;
 using Discord.Interactions;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Moq.Protected;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.Commands;
+using PaxAndromeda.Instar.Services;
 using Xunit;
 
-namespace InstarBot.Tests.Integration;
+namespace InstarBot.Tests;
 
 public static class TestUtilities
 {
+    private static IConfiguration? _config;
+    
     public static IConfiguration GetTestConfiguration()
     {
-        IConfiguration config = new ConfigurationBuilder()
+        if (_config is not null)
+            return _config;
+        
+        _config = new ConfigurationBuilder()
 #if DEBUG
             .AddJsonFile("Config/Instar.test.debug.conf.json")
 #else
@@ -22,9 +30,21 @@ public static class TestUtilities
 #endif
             .Build();
 
-        return config;
+        return _config;
     }
-    
+
+    public static TeamService GetTeamService()
+        => new(GetTestConfiguration());
+
+    public static IServiceProvider GetServices()
+    {
+        var sc = new ServiceCollection();
+        sc.AddSingleton(GetTestConfiguration());
+        sc.AddSingleton(GetTeamService());
+
+        return sc.BuildServiceProvider();
+    }
+
     /// <summary>
     /// Provides an method for verifying messages with an ambiguous Mock type.
     /// </summary>
@@ -72,6 +92,14 @@ public static class TestUtilities
             false, ephemeral, ItExpr.IsAny<AllowedMentions>(), ItExpr.IsAny<RequestOptions>(),
             ItExpr.IsAny<MessageComponent>(), ItExpr.IsAny<Embed>());
     }
+    
+    public static Mock<T> SetupCommandMock<T>(Expression<Func<T>> newExpression, CommandMockContext context = null!)
+        where T : BaseCommand
+    {
+        var commandMock = new Mock<T>(newExpression);
+        ConfigureCommandMock(commandMock, context);
+        return commandMock;
+    }
 
     public static Mock<T> SetupCommandMock<T>(CommandMockContext context = null!)
         where T : BaseCommand
@@ -90,15 +118,24 @@ public static class TestUtilities
     {
         context ??= new CommandMockContext();
         
-        mock.SetupGet<IGuildUser>(n => n.User!).Returns(SetupUserMock<IGuildUser>(context).Object);
-        mock.SetupGet<IGuildChannel>(n => n.Channel!).Returns(SetupChannelMock<ITextChannel>(context).Object);
-        // Note: The following line must occur after the mocking of GetChannel.
-        mock.SetupGet<IInstarGuild>(n => n.Guild).Returns(SetupGuildMock(context).Object);
+        mock.SetupGet<InstarContext>(n => n.Context).Returns(SetupContext(context).Object);
 
         mock.Protected().Setup<Task>("RespondAsync", ItExpr.IsNull<string>(), ItExpr.IsNull<Embed[]>(), It.IsAny<bool>(),
                 It.IsAny<bool>(), ItExpr.IsNull<AllowedMentions>(), ItExpr.IsNull<RequestOptions>(), ItExpr.IsNull<MessageComponent>(),
                 ItExpr.IsNull<Embed>())
             .Returns(Task.CompletedTask);
+    }
+
+    public static Mock<InstarContext> SetupContext(CommandMockContext? context)
+    {
+        var mock = new Mock<InstarContext>();
+        
+        mock.SetupGet<IGuildUser>(n => n.User!).Returns(SetupUserMock<IGuildUser>(context).Object);
+        mock.SetupGet<IGuildChannel>(n => n.Channel!).Returns(SetupChannelMock<ITextChannel>(context).Object);
+        // Note: The following line must occur after the mocking of GetChannel.
+        mock.SetupGet<IInstarGuild>(n => n.Guild).Returns(SetupGuildMock(context).Object);
+
+        return mock;
     }
 
     private static Mock<IInstarGuild> SetupGuildMock(CommandMockContext? context)
@@ -128,7 +165,7 @@ public static class TestUtilities
         var userMock = SetupUserMock<T>(context!.UserID);
 
         if (typeof(T) == typeof(IGuildUser))
-            userMock.As<IGuildUser>().Setup(n => n.RoleIds).Returns(context.UserRoles);
+            userMock.As<IGuildUser>().Setup(n => n.RoleIds).Returns(context.UserRoles.Select(n => n.ID).ToList);
 
         return userMock;
     }
@@ -167,5 +204,24 @@ public static class TestUtilities
         context.TextChannelMock = channelMock.As<ITextChannel>();
         
         return channelMock;
+    }
+
+    public static IEnumerable<Team> GetTeams(PageTarget pageTarget)
+    {
+        var teamsConfig =
+            GetTestConfiguration().GetSection("Teams").Get<List<Team>>()?
+                .ToDictionary(n => n.InternalID, n => n);
+
+        teamsConfig.Should().NotBeNull();
+        
+        var teamRefs = pageTarget.GetAttributesOfType<TeamRefAttribute>()?.Select(n => n.InternalID) ?? new List<string>();
+
+        foreach (var internalId in teamRefs)
+        {
+            if (!teamsConfig!.ContainsKey(internalId))
+                throw new KeyNotFoundException("Failed to find team with internal ID " + internalId);
+
+            yield return teamsConfig[internalId];
+        }
     }
 }

@@ -20,9 +20,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
     internal static void PurgeCache()
     {
         foreach (var n in Cache)
-        {
             Cache.Remove(n.Key, CacheEntryRemovedReason.Removed);
-        }
     }
 
     public ReportUserCommand(IConfiguration config)
@@ -60,7 +58,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
     [ModalInteraction(ModalId)]
     public async Task ModalResponse(ReportMessageModal modal)
     {
-        var message = (IMessage)Cache.Get(User!.Id.ToString());
+        var message = (IMessage)Cache.Get(Context.User!.Id.ToString());
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (message == null)
         {
@@ -68,7 +66,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
             return;
         }
 
-        await SendReportMessage(modal, message, Guild);
+        await SendReportMessage(modal, message, Context.Guild);
 
         await RespondAsync("Your report has been sent.", ephemeral: true);
     }
@@ -101,7 +99,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
             .WithValue($"https://discord.com/channels/{guild.Id}/{message.Channel?.Id}/{message.Id}"));
 
         fields.Add(new EmbedFieldBuilder().WithIsInline(false).WithName("Reported By")
-            .WithValue($"<@{User!.Id}>"));
+            .WithValue($"<@{Context.User!.Id}>"));
 
         var builder = new EmbedBuilder()
             // Set up all the basic stuff first
@@ -120,7 +118,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
 #endif
 
         await
-            Guild.GetTextChannel(_staffAnnounceChannel)
+            Context.Guild.GetTextChannel(_staffAnnounceChannel)
                 .SendMessageAsync(staffPing, embed: builder.Build());
     }
 }

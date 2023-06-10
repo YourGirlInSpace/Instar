@@ -1,16 +1,23 @@
-﻿using JetBrains.Annotations;
+﻿using System.Configuration;
+using JetBrains.Annotations;
 
 namespace PaxAndromeda.Instar;
 
 public class Team
 {
+    public string InternalID { get; [UsedImplicitly] set; } = null!;
     public string Name { get; [UsedImplicitly] set; } = null!;
 
     // ReSharper disable once InconsistentNaming
-    public ulong ID { get; [UsedImplicitly] set; }
+    [ConfigurationProperty("ID", DefaultValue = "999")]
+    [SnowflakeType(SnowflakeType.Role)]
+    public Snowflake ID { get; [UsedImplicitly] set; } = null!;
 
     // ReSharper disable once IdentifierTypo
-    public ulong Teamleader { get; [UsedImplicitly] set; }
+    [ConfigurationProperty("Teamleader", DefaultValue = "999")]
+    [SnowflakeType(SnowflakeType.User)]
+    public Snowflake Teamleader { get; [UsedImplicitly] set; } = null!;
+
     public uint Color { get; [UsedImplicitly] set; }
     public int Priority { get; [UsedImplicitly] set; }
 }

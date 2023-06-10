@@ -6,46 +6,24 @@ namespace PaxAndromeda.Instar;
 public enum PageTarget
 {
     Test,
-#if DEBUG
-    [TeamID(1113478543599468584), UsedImplicitly]
+    
+    [TeamRef("ffcf94e3-3080-455a-82e2-7cd9ec7eaafd"), UsedImplicitly]
     Owner,
-    [TeamID(1113478785292062800), UsedImplicitly]
+    [TeamRef("4e484ea5-3cd1-46d4-8fe8-666e34f251ad"), UsedImplicitly]
     Admin,
-    [TeamID(1113478610825773107), UsedImplicitly]
+    [TeamRef("9609125a-7e63-4110-8d50-381230ea11b2"), UsedImplicitly]
     Moderator,
-    [TeamID(1113478650768150671)]
-    [UsedImplicitly]
+    [TeamRef("521dce27-9ed9-48fc-9615-dc1d77b72fdd"), UsedImplicitly]
     Helper,
-    [TeamID(1113478706250395759)]
+    [TeamRef("fe434e9a-2a69-41b6-a297-24e26ba4aebe"), UsedImplicitly]
     [ChoiceDisplay("Community Manager")]
-    [UsedImplicitly]
     CommunityManager,
 
-    [TeamID(1113478543599468584)]
-    [TeamID(1113478785292062800)]
-    [TeamID(1113478610825773107)]
-    [TeamID(1113478650768150671)]
-    [TeamID(1113478706250395759)]
+    [TeamRef("ffcf94e3-3080-455a-82e2-7cd9ec7eaafd")]
+    [TeamRef("4e484ea5-3cd1-46d4-8fe8-666e34f251ad")]
+    [TeamRef("9609125a-7e63-4110-8d50-381230ea11b2")]
+    [TeamRef("521dce27-9ed9-48fc-9615-dc1d77b72fdd")]
+    [TeamRef("fe434e9a-2a69-41b6-a297-24e26ba4aebe")]
     [UsedImplicitly]
     All
-#else
-    [TeamID(793607464833908779), UsedImplicitly]
-    Owner,
-
-    [TeamID(985550619844694037), UsedImplicitly]
-    Admin,
-
-    [TeamID(820350564931338260), UsedImplicitly]
-    Moderator,
-
-    [TeamID(801889809211064390), UsedImplicitly]
-    Helper,
-
-    [TeamID(957411837920567356), ChoiceDisplay("Community Manager"), UsedImplicitly]
-    CommunityManager,
-
-    [TeamID(793607464833908779), TeamID(985550619844694037), TeamID(820350564931338260), TeamID(801889809211064390), TeamID(957411837920567356)]
-    [UsedImplicitly]
-    All
-#endif
 }

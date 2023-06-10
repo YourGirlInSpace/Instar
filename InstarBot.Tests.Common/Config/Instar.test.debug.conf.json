@@ -2,12 +2,18 @@
   "Testing": true,
   
   "BotName": "Instar",
-  "TargetGuild": "985521318080413766",
-  "TargetChannel": "985521318080413769",
+  "TargetGuild": 985521318080413766,
+  "TargetChannel": 985521318080413769,
   "Token": "{{DISCORD BOT TOKEN}}",
   "StaffAnnounceChannel": 985521973113286667,
+  "AuthorizedStaffID": [
+    985521877122428978,
+    1113478706250395759,
+    793607635608928257
+  ],
   "Teams": [
     {
+      "InternalID": "ffcf94e3-3080-455a-82e2-7cd9ec7eaafd",
       "Name": "Owner",
       "ID": 1113478543599468584,
       "Teamleader": 130082061988921344,
@@ -15,6 +21,7 @@
       "Priority": 1
     },
     {
+      "InternalID": "4e484ea5-3cd1-46d4-8fe8-666e34f251ad",
       "Name": "Admin",
       "ID": 1113478785292062800,
       "Teamleader": 107839904318271488,
@@ -22,6 +29,7 @@
       "Priority": 2
     },
     {
+      "InternalID": "9609125a-7e63-4110-8d50-381230ea11b2",
       "Name": "Moderator",
       "ID": 1113478610825773107,
       "Teamleader": 346194980408393728,
@@ -29,6 +37,7 @@
       "Priority": 3
     },
     {
+      "InternalID": "521dce27-9ed9-48fc-9615-dc1d77b72fdd",
       "Name": "Helper",
       "ID": 1113478650768150671,
       "Teamleader": 459078815314870283,
@@ -36,6 +45,7 @@
       "Priority": 4
     },
     {
+      "InternalID": "fe434e9a-2a69-41b6-a297-24e26ba4aebe",
       "Name": "Community Manager",
       "ID": 1113478706250395759,
       "Teamleader": 340546691491168257,

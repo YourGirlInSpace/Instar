@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "BotName": {
+      "type": "string"
+    },
+    "TargetGuild": {
+      "type": "integer"
+    },
+    "TargetChannel": {
+      "type": "integer"
+    },
+    "Token": {
+      "type": "string"
+    },
+    "StaffAnnounceChannel": {
+      "type": "integer"
+    },
+    "StaffRoleID": {
+      "type": "integer"
+    },
+    "AuthorizedStaffID": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "Teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "InternalID": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "ID": {
+            "type": "integer"
+          },
+          "Teamleader": {
+            "type": "integer"
+          },
+          "Color": {
+            "type": "integer"
+          },
+          "Priority": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "InternalID",
+          "Name",
+          "ID",
+          "Teamleader",
+          "Color",
+          "Priority"
+        ]
+      }
+    }
+  },
+  "required": [
+    "BotName",
+    "TargetGuild",
+    "TargetChannel",
+    "Token",
+    "StaffAnnounceChannel",
+    "StaffRoleID",
+    "AuthorizedStaffID",
+    "Teams"
+  ]
+}

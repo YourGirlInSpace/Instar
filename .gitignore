@@ -362,6 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /InstarBot/Config/*.json
+!/InstarBot/Config/Instar.conf.schema.json
 
 # Rider projects
 .idea/
