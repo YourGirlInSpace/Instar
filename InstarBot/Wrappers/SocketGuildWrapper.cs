@@ -7,6 +7,7 @@ namespace PaxAndromeda.Instar.Wrappers;
 /// <summary>
 /// Mock wrapper for <see cref="SocketGuild"/>
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Wrapper class")]
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public class SocketGuildWrapper : IInstarGuild
 {
@@ -20,5 +21,7 @@ public class SocketGuildWrapper : IInstarGuild
     public virtual ulong Id => _guild.Id;
 
     public virtual ITextChannel GetTextChannel(ulong channelId)
-        => _guild.GetTextChannel(channelId);
+    {
+        return _guild.GetTextChannel(channelId);
+    }
 }

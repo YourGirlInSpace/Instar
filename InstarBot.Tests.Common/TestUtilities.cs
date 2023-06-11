@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Discord;
 using Discord.Interactions;
 using FluentAssertions;
+using InstarBot.Tests.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -16,12 +17,12 @@ namespace InstarBot.Tests;
 public static class TestUtilities
 {
     private static IConfiguration? _config;
-    
+
     public static IConfiguration GetTestConfiguration()
     {
         if (_config is not null)
             return _config;
-        
+
         _config = new ConfigurationBuilder()
 #if DEBUG
             .AddJsonFile("Config/Instar.test.debug.conf.json")
@@ -34,13 +35,16 @@ public static class TestUtilities
     }
 
     public static TeamService GetTeamService()
-        => new(GetTestConfiguration());
+    {
+        return new TeamService(GetTestConfiguration());
+    }
 
     public static IServiceProvider GetServices()
     {
         var sc = new ServiceCollection();
         sc.AddSingleton(GetTestConfiguration());
         sc.AddSingleton(GetTeamService());
+        sc.AddSingleton<IInstarDDBService, MockInstarDDBService>();
 
         return sc.BuildServiceProvider();
     }
@@ -58,7 +62,7 @@ public static class TestUtilities
         Assert.Equal(nameof(Mock), mockObjectType.Name[..mockObjectType.Name.LastIndexOf('`')]);
         Assert.Single(mockObjectType.GenericTypeArguments);
         var commandType = mockObjectType.GenericTypeArguments[0];
-        
+
         var genericVerifyMessage = typeof(TestUtilities)
             .GetMethods()
             .Where(n => n.Name == nameof(VerifyMessage))
@@ -75,7 +79,7 @@ public static class TestUtilities
         var specificMethod = genericVerifyMessage.MakeGenericMethod(commandType);
         specificMethod.Invoke(null, new[] { mockObject, message, ephemeral });
     }
-    
+
     /// <summary>
     /// Verifies that the command responded to the user with the correct <paramref name="message"/>.
     /// </summary>
@@ -92,7 +96,7 @@ public static class TestUtilities
             false, ephemeral, ItExpr.IsAny<AllowedMentions>(), ItExpr.IsAny<RequestOptions>(),
             ItExpr.IsAny<MessageComponent>(), ItExpr.IsAny<Embed>());
     }
-    
+
     public static Mock<T> SetupCommandMock<T>(Expression<Func<T>> newExpression, CommandMockContext context = null!)
         where T : BaseCommand
     {
@@ -107,7 +111,7 @@ public static class TestUtilities
         // Quick check:  Do we have a constructor that takes IConfiguration?
         var iConfigCtor = typeof(T).GetConstructors()
             .Any(n => n.GetParameters().Any(info => info.ParameterType == typeof(IConfiguration)));
-        
+
         var commandMock = iConfigCtor ? new Mock<T>(GetTestConfiguration()) : new Mock<T>();
         ConfigureCommandMock(commandMock, context);
         return commandMock;
@@ -117,11 +121,13 @@ public static class TestUtilities
         where T : BaseCommand
     {
         context ??= new CommandMockContext();
-        
+
         mock.SetupGet<InstarContext>(n => n.Context).Returns(SetupContext(context).Object);
 
-        mock.Protected().Setup<Task>("RespondAsync", ItExpr.IsNull<string>(), ItExpr.IsNull<Embed[]>(), It.IsAny<bool>(),
-                It.IsAny<bool>(), ItExpr.IsNull<AllowedMentions>(), ItExpr.IsNull<RequestOptions>(), ItExpr.IsNull<MessageComponent>(),
+        mock.Protected().Setup<Task>("RespondAsync", ItExpr.IsNull<string>(), ItExpr.IsNull<Embed[]>(),
+                It.IsAny<bool>(),
+                It.IsAny<bool>(), ItExpr.IsNull<AllowedMentions>(), ItExpr.IsNull<RequestOptions>(),
+                ItExpr.IsNull<MessageComponent>(),
                 ItExpr.IsNull<Embed>())
             .Returns(Task.CompletedTask);
     }
@@ -129,7 +135,7 @@ public static class TestUtilities
     public static Mock<InstarContext> SetupContext(CommandMockContext? context)
     {
         var mock = new Mock<InstarContext>();
-        
+
         mock.SetupGet<IGuildUser>(n => n.User!).Returns(SetupUserMock<IGuildUser>(context).Object);
         mock.SetupGet<IGuildChannel>(n => n.Channel!).Returns(SetupChannelMock<ITextChannel>(context).Object);
         // Note: The following line must occur after the mocking of GetChannel.
@@ -141,7 +147,7 @@ public static class TestUtilities
     private static Mock<IInstarGuild> SetupGuildMock(CommandMockContext? context)
     {
         context.Should().NotBeNull();
-        
+
         var guildMock = new Mock<IInstarGuild>();
         guildMock.Setup(n => n.Id).Returns(context!.GuildID);
         guildMock.Setup(n => n.GetTextChannel(It.IsAny<ulong>()))
@@ -149,7 +155,7 @@ public static class TestUtilities
 
         return guildMock;
     }
-    
+
     public static Mock<T> SetupUserMock<T>(ulong userId)
         where T : class, IUser
     {
@@ -202,7 +208,7 @@ public static class TestUtilities
             .Returns(Task.FromResult(new Mock<IUserMessage>().Object));
 
         context.TextChannelMock = channelMock.As<ITextChannel>();
-        
+
         return channelMock;
     }
 
@@ -213,8 +219,9 @@ public static class TestUtilities
                 .ToDictionary(n => n.InternalID, n => n);
 
         teamsConfig.Should().NotBeNull();
-        
-        var teamRefs = pageTarget.GetAttributesOfType<TeamRefAttribute>()?.Select(n => n.InternalID) ?? new List<string>();
+
+        var teamRefs = pageTarget.GetAttributesOfType<TeamRefAttribute>()?.Select(n => n.InternalID) ??
+                       new List<string>();
 
         foreach (var internalId in teamRefs)
         {

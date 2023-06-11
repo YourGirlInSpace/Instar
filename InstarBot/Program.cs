@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
@@ -9,6 +10,7 @@ using Serilog.Events;
 
 namespace PaxAndromeda.Instar;
 
+[ExcludeFromCodeCoverage]
 internal static class Program
 {
     private static CancellationTokenSource _cts = null!;
@@ -91,7 +93,7 @@ internal static class Program
 
     private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        Log.Fatal(e.ExceptionObject as Exception, "FATAL: Unhandled exception caught.");
+        Log.Fatal(e.ExceptionObject as Exception, "FATAL: Unhandled exception caught");
     }
 
     private static IServiceProvider ConfigureServices(IConfiguration config)
@@ -100,6 +102,7 @@ internal static class Program
 
         services.AddSingleton(config);
         services.AddSingleton<TeamService>();
+        services.AddTransient<IInstarDDBService, InstarDDBService>();
         services.AddTransient<PingCommand>();
         services.AddTransient<SetBirthdayCommand>();
         services.AddSingleton<PageCommand>();

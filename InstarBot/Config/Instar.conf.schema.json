@@ -14,6 +14,25 @@
     "Token": {
       "type": "string"
     },
+    "AWS": {
+      "type": "object",
+      "properties": {
+        "AccessKey": {
+          "type": "string"
+        },
+        "SecretAccessKey": {
+          "type": "string"
+        },
+        "Region": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "AccessKey",
+        "SecretAccessKey",
+        "Region"
+      ]
+    },
     "StaffAnnounceChannel": {
       "type": "integer"
     },
@@ -22,43 +41,174 @@
     },
     "AuthorizedStaffID": {
       "type": "array",
-      "items": {
-        "type": "integer"
-      }
+      "items": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "integer"
+        }
+      ]
     },
     "Teams": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "InternalID": {
-            "type": "string"
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "InternalID": {
+              "type": "string"
+            },
+            "Name": {
+              "type": "string"
+            },
+            "ID": {
+              "type": "integer"
+            },
+            "Teamleader": {
+              "type": "integer"
+            },
+            "Color": {
+              "type": "integer"
+            },
+            "Priority": {
+              "type": "integer"
+            }
           },
-          "Name": {
-            "type": "string"
-          },
-          "ID": {
-            "type": "integer"
-          },
-          "Teamleader": {
-            "type": "integer"
-          },
-          "Color": {
-            "type": "integer"
-          },
-          "Priority": {
-            "type": "integer"
-          }
+          "required": [
+            "InternalID",
+            "Name",
+            "ID",
+            "Teamleader",
+            "Color",
+            "Priority"
+          ]
         },
-        "required": [
-          "InternalID",
-          "Name",
-          "ID",
-          "Teamleader",
-          "Color",
-          "Priority"
-        ]
-      }
+        {
+          "type": "object",
+          "properties": {
+            "InternalID": {
+              "type": "string"
+            },
+            "Name": {
+              "type": "string"
+            },
+            "ID": {
+              "type": "integer"
+            },
+            "Teamleader": {
+              "type": "integer"
+            },
+            "Color": {
+              "type": "integer"
+            },
+            "Priority": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "InternalID",
+            "Name",
+            "ID",
+            "Teamleader",
+            "Color",
+            "Priority"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "InternalID": {
+              "type": "string"
+            },
+            "Name": {
+              "type": "string"
+            },
+            "ID": {
+              "type": "integer"
+            },
+            "Teamleader": {
+              "type": "integer"
+            },
+            "Color": {
+              "type": "integer"
+            },
+            "Priority": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "InternalID",
+            "Name",
+            "ID",
+            "Teamleader",
+            "Color",
+            "Priority"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "InternalID": {
+              "type": "string"
+            },
+            "Name": {
+              "type": "string"
+            },
+            "ID": {
+              "type": "integer"
+            },
+            "Teamleader": {
+              "type": "integer"
+            },
+            "Color": {
+              "type": "integer"
+            },
+            "Priority": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "InternalID",
+            "Name",
+            "ID",
+            "Teamleader",
+            "Color",
+            "Priority"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "InternalID": {
+              "type": "string"
+            },
+            "Name": {
+              "type": "string"
+            },
+            "ID": {
+              "type": "integer"
+            },
+            "Teamleader": {
+              "type": "integer"
+            },
+            "Color": {
+              "type": "integer"
+            },
+            "Priority": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "InternalID",
+            "Name",
+            "ID",
+            "Teamleader",
+            "Color",
+            "Priority"
+          ]
+        }
+      ]
     }
   },
   "required": [
@@ -66,6 +216,7 @@
     "TargetGuild",
     "TargetChannel",
     "Token",
+    "AWS",
     "StaffAnnounceChannel",
     "StaffRoleID",
     "AuthorizedStaffID",

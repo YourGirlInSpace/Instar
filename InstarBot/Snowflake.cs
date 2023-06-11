@@ -129,9 +129,20 @@ public record Snowflake
         GeneratedId = (int)(id & 0xFFF);
     }
 
-    public static implicit operator ulong(Snowflake snowflake) => snowflake.ID;
+    public static implicit operator ulong(Snowflake snowflake)
+    {
+        return snowflake.ID;
+    }
 
-    public static implicit operator DateTime(Snowflake snowflake) => snowflake.Time;
+    public static implicit operator Snowflake(ulong userId)
+    {
+        return new Snowflake(userId);
+    }
+
+    public static implicit operator DateTime(Snowflake snowflake)
+    {
+        return snowflake.Time;
+    }
 
     /// <summary>
     /// Generates a new snowflake from the current time.
@@ -175,7 +186,7 @@ public record Snowflake
     public static string GetMention(Expression<Func<Snowflake>> propertySelector)
     {
         Guard.Against.Null(propertySelector);
-        
+
         if (propertySelector.Body is not MemberExpression memberExpression)
             throw new ArgumentException("Selector must refer to a member", nameof(propertySelector));
 

@@ -6,6 +6,7 @@ using PaxAndromeda.Instar.Wrappers;
 
 namespace PaxAndromeda.Instar;
 
+[ExcludeFromCodeCoverage(Justification = "Wrapper")]
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public class InstarContext : IInteractionContext
 {
@@ -15,10 +16,11 @@ public class InstarContext : IInteractionContext
     {
         _context = context;
     }
-    
+
     [UsedImplicitly]
     public InstarContext()
-    { }
+    {
+    }
 
     public IDiscordClient Client => ((IInteractionContext)_context).Client;
 

@@ -40,11 +40,11 @@ public class PageCommand : BaseCommand
     {
         Guard.Against.NullOrEmpty(reason);
         Guard.Against.Null(Context.User);
-        
+
         try
         {
             Log.Verbose("User {User} is attempting to page {Team}: {Reason}", Context.User.Id, team, reason);
-            
+
             var userTeam = _teamService.GetUserPrimaryStaffTeam(Context.User);
             if (!CheckPermissions(Context.User, userTeam, team, teamLead, out var response))
             {
@@ -72,7 +72,7 @@ public class PageCommand : BaseCommand
             await RespondAsync("Failed to process command due to an internal server error.", ephemeral: true);
         }
     }
-    
+
     /// <summary>
     ///     Determines whether a <paramref name="user" /> has the authority to issue a page to <paramref name="pageTarget" />.
     /// </summary>
@@ -90,7 +90,7 @@ public class PageCommand : BaseCommand
         if (team is null)
         {
             response = "You are not authorized to use this command.";
-            Log.Information("{User} was not authorized to send a page.", user.Id);
+            Log.Information("{User} was not authorized to send a page", user.Id);
             return false;
         }
 
@@ -101,7 +101,7 @@ public class PageCommand : BaseCommand
         if (team.Priority > 3 && pageTarget == PageTarget.All) // i.e. Helper, Community Manager
         {
             response = "You are not authorized to send a page to the entire staff team.";
-            Log.Information("{User} was not authorized to send a page to the entire staff team.", user.Id);
+            Log.Information("{User} was not authorized to send a page to the entire staff team", user.Id);
             return false;
         }
 

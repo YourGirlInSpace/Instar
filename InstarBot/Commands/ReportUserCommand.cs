@@ -1,4 +1,5 @@
-﻿using System.Runtime.Caching;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Caching;
 using Discord;
 using Discord.Interactions;
 using Microsoft.Extensions.Configuration;
@@ -26,12 +27,13 @@ public class ReportUserCommand : BaseCommand, IContextCommand
     public ReportUserCommand(IConfiguration config)
     {
         _staffAnnounceChannel = config.GetValue<ulong>("StaffAnnounceChannel");
-        
+
 #if !DEBUG
         _staffRoleId = config.GetValue<ulong>("StaffRoleID");
 #endif
     }
 
+    [ExcludeFromCodeCoverage(Justification = "Constant used for mapping")]
     public string Name => "Report Message";
 
     public async Task HandleCommand(IInstarMessageCommandInteraction arg)
@@ -46,6 +48,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
         await arg.RespondWithModalAsync<ReportMessageModal>(ModalId);
     }
 
+    [ExcludeFromCodeCoverage(Justification = "Purely a creation utility method")]
     public MessageCommandProperties CreateCommand()
     {
         Log.Verbose("Registering ReportUserCommand...");

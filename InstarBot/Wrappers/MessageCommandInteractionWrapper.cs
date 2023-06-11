@@ -7,6 +7,7 @@ namespace PaxAndromeda.Instar.Wrappers;
 /// <summary>
 /// Mock wrapper for <see cref="IMessageCommandInteraction"/>
 /// </summary>
+[ExcludeFromCodeCoverage(Justification = "Wrapper class")]
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public class MessageCommandInteractionWrapper : IInstarMessageCommandInteraction
 {
@@ -23,5 +24,7 @@ public class MessageCommandInteractionWrapper : IInstarMessageCommandInteraction
 
     public virtual Task RespondWithModalAsync<T>(string customId, RequestOptions options = null!,
         Action<ModalBuilder> modifyModal = null!) where T : class, IModal
-        => _interaction.RespondWithModalAsync<T>(customId, options, modifyModal);
+    {
+        return _interaction.RespondWithModalAsync<T>(customId, options, modifyModal);
+    }
 }

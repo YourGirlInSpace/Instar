@@ -9,23 +9,22 @@ public class SnowflakeTests
 {
     // This snowflake has a time of 2016-04-30 11:18:25.769 UTC, and a generated ID of 7
     private const ulong DefaultTestSnowflake = 175928847299117063;
-    
+
     private static Snowflake UnknownSnowflake => new(DefaultTestSnowflake);
-    
-    [SnowflakeType(SnowflakeType.User)]
-    private static Snowflake UserSnowflake => new(DefaultTestSnowflake);
-    
-    [SnowflakeType(SnowflakeType.Role)]
-    private static Snowflake RoleSnowflake => new(DefaultTestSnowflake);
-    
-    [SnowflakeType(SnowflakeType.Channel)]
-    private static Snowflake ChannelSnowflake => new(DefaultTestSnowflake);
-    
-    [SnowflakeType(SnowflakeType.Guild)]
-    private static Snowflake GuildSnowflake => new(DefaultTestSnowflake);
-    
-    private static Snowflake SnowflakeReturnMethod() => UnknownSnowflake;
-    
+
+    [SnowflakeType(SnowflakeType.User)] private static Snowflake UserSnowflake => new(DefaultTestSnowflake);
+
+    [SnowflakeType(SnowflakeType.Role)] private static Snowflake RoleSnowflake => new(DefaultTestSnowflake);
+
+    [SnowflakeType(SnowflakeType.Channel)] private static Snowflake ChannelSnowflake => new(DefaultTestSnowflake);
+
+    [SnowflakeType(SnowflakeType.Guild)] private static Snowflake GuildSnowflake => new(DefaultTestSnowflake);
+
+    private static Snowflake SnowflakeReturnMethod()
+    {
+        return UnknownSnowflake;
+    }
+
     private static ulong GenerateSnowflakeFromTimestamp(DateTime time)
     {
         const long DiscordEpoch = 1420070400000;

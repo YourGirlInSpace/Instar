@@ -8,7 +8,8 @@ namespace PaxAndromeda.Instar.Preconditions;
 
 public class RequireStaffMemberAttribute : PreconditionAttribute
 {
-    public override Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context, ICommandInfo commandInfo, IServiceProvider services)
+    public override Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context,
+        ICommandInfo commandInfo, IServiceProvider services)
     {
         var config = services.GetService<IConfiguration>();
 

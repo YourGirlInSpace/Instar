@@ -13,5 +13,6 @@ public abstract class BaseCommand : InteractionModuleBase<SocketInteractionConte
     /// <summary>
     /// Overrides the default Context property for testing purposes
     /// </summary>
-    protected internal new virtual InstarContext Context => new (base.Context);
+    [ExcludeFromCodeCoverage(Justification = "Mockable pointer")]
+    protected internal new virtual InstarContext Context => new(base.Context);
 }

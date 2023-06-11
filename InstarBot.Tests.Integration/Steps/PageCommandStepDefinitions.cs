@@ -47,7 +47,7 @@ public sealed class PageCommandStepDefinitions
         _scenarioContext.Add("PageTarget", target);
         _scenarioContext.Add("PagingTeamLeader", true);
     }
-    
+
     [When("the user calls the Page command")]
     public async Task WhenTheUserCallsThePageCommand()
     {
@@ -55,11 +55,11 @@ public sealed class PageCommandStepDefinitions
         _scenarioContext.ContainsKey("PagingTeamLeader").Should().BeTrue();
         var pageTarget = _scenarioContext.Get<PageTarget>("PageTarget");
         var pagingTeamLeader = _scenarioContext.Get<bool>("PagingTeamLeader");
-        
+
         var command = SetupMocks();
         _scenarioContext.Add("Command", command);
-        
-        await command.Object.Page(pageTarget, "This is a test reason", teamLead: pagingTeamLeader);
+
+        await command.Object.Page(pageTarget, "This is a test reason", pagingTeamLeader);
     }
 
     [Then("Instar should emit a valid Page embed")]
@@ -69,17 +69,19 @@ public sealed class PageCommandStepDefinitions
         _scenarioContext.ContainsKey("PageTarget").Should().BeTrue();
         var command = _scenarioContext.Get<Mock<PageCommand>>("Command");
         var pageTarget = _scenarioContext.Get<PageTarget>("PageTarget");
-        
+
         string expectedString;
 
         if (pageTarget == PageTarget.Test)
+        {
             expectedString = "This is a __**TEST**__ page.";
+        }
         else
         {
             var team = TestUtilities.GetTeams(pageTarget).First();
             expectedString = Snowflake.GetMention(() => team.ID);
         }
-        
+
         command.Protected().Verify(
             "RespondAsync", Times.Once(),
             expectedString, ItExpr.IsNull<Embed[]>(),
@@ -92,7 +94,7 @@ public sealed class PageCommandStepDefinitions
     {
         _scenarioContext.ContainsKey("Command").Should().BeTrue();
         _scenarioContext.ContainsKey("PageTarget").Should().BeTrue();
-        
+
         var command = _scenarioContext.Get<Mock<PageCommand>>("Command");
         var pageTarget = _scenarioContext.Get<PageTarget>("PageTarget");
 
@@ -110,16 +112,18 @@ public sealed class PageCommandStepDefinitions
                 .ToDictionary(n => n.InternalID, n => n);
 
         // Eeeeeeeeeeeeevil
-        return teamsConfig![pageTarget.GetAttributesOfType<TeamRefAttribute>()?.First().InternalID ?? "idkjustfail"].Teamleader;
+        return teamsConfig![pageTarget.GetAttributesOfType<TeamRefAttribute>()?.First().InternalID ?? "idkjustfail"]
+            .Teamleader;
     }
-    
+
     [Then("Instar should emit a valid All Page embed")]
     public void ThenInstarShouldEmitAValidAllPageEmbed()
     {
         _scenarioContext.ContainsKey("Command").Should().BeTrue();
         var command = _scenarioContext.Get<Mock<PageCommand>>("Command");
-        var expected = string.Join(' ', TestUtilities.GetTeams(PageTarget.All).Select(n => Snowflake.GetMention(() => n.ID)));
-        
+        var expected = string.Join(' ',
+            TestUtilities.GetTeams(PageTarget.All).Select(n => Snowflake.GetMention(() => n.ID)));
+
         command.Protected().Verify(
             "RespondAsync", Times.Once(),
             expected, ItExpr.IsNull<Embed[]>(),

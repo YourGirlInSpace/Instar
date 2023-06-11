@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Diagnostics.CodeAnalysis;
+using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using Serilog.Events;
 
 namespace PaxAndromeda.Instar.Services;
 
+[ExcludeFromCodeCoverage]
 public class DiscordService
 {
     private readonly string _botToken;
@@ -85,7 +87,7 @@ public class DiscordService
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed to handle interaction.");
+            Log.Error(ex, "Failed to handle interaction");
 
             // If a Slash Command execution fails it is most likely that the original interaction acknowledgement will persist. It is a good idea to delete the original
             // response, or at least let the user know that something went wrong during the command execution.
@@ -123,6 +125,7 @@ public class DiscordService
         await _socketClient.StartAsync();
     }
 
+    [SuppressMessage("ReSharper", "TemplateIsNotCompileTimeConstantProblem")]
     private static Task HandleDiscordLog(LogMessage arg)
     {
         var severity = arg.Severity switch

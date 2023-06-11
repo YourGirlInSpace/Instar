@@ -18,22 +18,22 @@ public class ReportUserCommandStepDefinitions
     {
         _context = context;
     }
-    
+
     [When(@"the user (.*) reports a message with the following properties")]
     public async Task WhenTheUserReportsAMessageWithTheFollowingProperties(ulong userId, Table table)
     {
         _context.Add("ReportingUserID", userId);
 
         var messageProperties = table.Rows.ToDictionary(n => n["Key"], n => n);
-        
+
         Assert.True(messageProperties.ContainsKey("Content"));
         Assert.True(messageProperties.ContainsKey("Sender"));
         Assert.True(messageProperties.ContainsKey("Channel"));
-        
+
         _context.Add("MessageContent", messageProperties["Content"].GetString("Value"));
-        _context.Add("MessageSender", (ulong) messageProperties["Sender"].GetInt64("Value"));
-        _context.Add("MessageChannel", (ulong) messageProperties["Channel"].GetInt64("Value"));
-        
+        _context.Add("MessageSender", (ulong)messageProperties["Sender"].GetInt64("Value"));
+        _context.Add("MessageChannel", (ulong)messageProperties["Channel"].GetInt64("Value"));
+
         var (command, interactionContext) = SetupMocks();
         _context.Add("Command", command);
         _context.Add("InteractionContext", interactionContext);
@@ -46,7 +46,7 @@ public class ReportUserCommandStepDefinitions
     {
         Assert.True(_context.ContainsKey("Command"));
         var command = _context.Get<Mock<ReportUserCommand>>("Command");
-        
+
         ReportUserCommand.PurgeCache();
         _context.Add("ReportReason", string.Empty);
 
@@ -68,18 +68,19 @@ public class ReportUserCommandStepDefinitions
             ReportReason = reportReason
         });
     }
+
     [Then(@"Instar should emit a message report embed")]
     public void ThenInstarShouldEmitAMessageReportEmbed()
     {
         Assert.True(_context.ContainsKey("TextChannelMock"));
         var textChannel = _context.Get<Mock<ITextChannel>>("TextChannelMock");
-        
+
         textChannel.Verify(n => n.SendMessageAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Embed>(),
             It.IsAny<RequestOptions>(),
             It.IsAny<AllowedMentions>(), It.IsAny<MessageReference>(), It.IsAny<MessageComponent>(),
             It.IsAny<ISticker[]>(),
             It.IsAny<Embed[]>(), It.IsAny<MessageFlags>()));
-        
+
         Assert.True(_context.ContainsKey("ResultEmbed"));
         var embed = _context.Get<Embed>("ResultEmbed");
 
@@ -107,7 +108,7 @@ public class ReportUserCommandStepDefinitions
     {
         var userMock = TestUtilities.SetupUserMock<IGuildUser>(_context.Get<ulong>("ReportingUserID"));
         var authorMock = TestUtilities.SetupUserMock<IGuildUser>(_context.Get<ulong>("MessageSender"));
-        
+
         var channelMock = TestUtilities.SetupChannelMock<ITextChannel>(_context.Get<ulong>("MessageChannel"));
 
         var messageMock = new Mock<IMessage>();
@@ -117,16 +118,16 @@ public class ReportUserCommandStepDefinitions
 
         var socketMessageDataMock = new Mock<IMessageCommandInteractionData>();
         socketMessageDataMock.Setup(n => n.Message).Returns(messageMock.Object);
-        
+
         var socketMessageCommandMock = new Mock<IInstarMessageCommandInteraction>();
         socketMessageCommandMock.Setup(n => n.User).Returns(userMock.Object);
         socketMessageCommandMock.Setup(n => n.Data).Returns(socketMessageDataMock.Object);
-        
+
         socketMessageCommandMock.Setup<Task>(n =>
                 n.RespondWithModalAsync<ReportMessageModal>(It.IsAny<string>(), It.IsAny<RequestOptions>(),
                     It.IsAny<Action<ModalBuilder>>()))
             .Returns(Task.CompletedTask);
-        
+
         return socketMessageCommandMock;
     }
 }

@@ -8,9 +8,9 @@ namespace InstarBot.Tests;
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
 public class CommandMockContext
 {
-    public ulong UserID { get; init; } = 100;
-    public ulong ChannelID { get; init; } = 200;
-    public ulong GuildID { get; init; } = 300;
+    public ulong UserID { get; init; } = 1420070400100;
+    public ulong ChannelID { get; init; } = 1420070400200;
+    public ulong GuildID { get; init; } = 1420070400300;
 
     public List<Snowflake> UserRoles { get; init; } = new();
 

@@ -11,7 +11,7 @@ public class InstarHooks
     {
         _scenarioContext = scenarioContext;
     }
-        
+
     [Then(@"Instar should emit a message stating ""(.*)""")]
     public void ThenInstarShouldEmitAMessageStating(string message)
     {
@@ -19,7 +19,7 @@ public class InstarHooks
         var cmdObject = _scenarioContext.Get<object>("Command");
         TestUtilities.VerifyMessage(cmdObject, message);
     }
-        
+
     [Then(@"Instar should emit an ephemeral message stating ""(.*)""")]
     public void ThenInstarShouldEmitAnEphemeralMessageStating(string message)
     {

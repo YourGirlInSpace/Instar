@@ -9,12 +9,6 @@ namespace PaxAndromeda.Instar.Converters;
 /// </summary>
 public class SnowflakeConverter : ConfigurationConverterBase
 {
-    public override bool CanConvertTo(
-        ITypeDescriptorContext ctx, Type type)
-    {
-        return type == typeof(string);
-    }
-
     public override bool CanConvertFrom(
         ITypeDescriptorContext ctx, Type type)
     {
@@ -24,7 +18,6 @@ public class SnowflakeConverter : ConfigurationConverterBase
     public override object ConvertFrom(
         ITypeDescriptorContext? ctx, CultureInfo? ci, object data)
     {
-
         var id = ulong.Parse((string)data,
             CultureInfo.InvariantCulture);
 

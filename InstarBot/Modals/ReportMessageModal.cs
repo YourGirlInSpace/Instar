@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using System.Diagnostics.CodeAnalysis;
+using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 
@@ -12,5 +13,5 @@ public class ReportMessageModal : IModal
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public string? ReportReason { get; set; }
 
-    public string Title => "Report Message";
+    [ExcludeFromCodeCoverage] public string Title => "Report Message";
 }

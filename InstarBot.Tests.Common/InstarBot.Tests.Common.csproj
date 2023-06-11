@@ -10,22 +10,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentAssertions" Version="6.11.0" />
-      <PackageReference Include="Moq" Version="4.18.4" />
-      <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="FluentAssertions" Version="6.11.0"/>
+        <PackageReference Include="Moq" Version="4.18.4"/>
+        <PackageReference Include="xunit" Version="2.4.1"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\InstarBot\InstarBot.csproj" />
+        <ProjectReference Include="..\InstarBot\InstarBot.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Config\Instar.test.debug.conf.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Update="Config\Instar.test.conf.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="Config\Instar.test.debug.conf.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Config\Instar.test.conf.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>
