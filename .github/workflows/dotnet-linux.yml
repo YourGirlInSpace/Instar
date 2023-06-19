@@ -26,3 +26,20 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+
+  specflow:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Generate Specflow Tests
+      uses: actions/cryptic-wizard/run-specflow-tests@v1.3.1
+      with:
+        test-assembly-path: InstarBot.Tests.Integration/bin/Release/netcoreapp6.0
+        test-assembly-dll: InstarBot.Tests.Integration.dll
+        output-html: IntegrationTestResults.html
