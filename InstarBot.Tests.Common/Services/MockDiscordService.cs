@@ -1,5 +1,4 @@
 using Discord;
-using Discord.WebSocket;
 using InstarBot.Tests.Models;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.Services;

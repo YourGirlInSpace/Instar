@@ -144,21 +144,6 @@ public sealed class Snowflake : IEquatable<Snowflake>
         return snowflake.Time;
     }
 
-    public static Snowflake Parse(string input)
-    {
-        return ulong.Parse(input);
-    }
-
-    public static bool TryParse(string input, out Snowflake snowflake)
-    {
-        snowflake = default!;
-        if (!ulong.TryParse(input, out var rawId))
-            return false;
-
-        snowflake = new Snowflake(rawId);
-        return true;
-    }
-
     /// <summary>
     /// Generates a new snowflake from the current time.
     /// </summary>

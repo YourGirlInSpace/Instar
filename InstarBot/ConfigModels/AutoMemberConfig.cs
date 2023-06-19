@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 
 namespace PaxAndromeda.Instar.ConfigModels;
@@ -13,8 +14,9 @@ public class AutoMemberConfig
 }
 
 [UsedImplicitly]
+[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
 public class RoleGroup
 {
-    public string GroupName { get; set; } = null!;
+    [UsedImplicitly] public string GroupName { get; set; } = null!;
     public List<Snowflake> Roles { get; set; } = null!;
 }

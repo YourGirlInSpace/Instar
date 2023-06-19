@@ -6,12 +6,14 @@ namespace PaxAndromeda.Instar.Gaius;
 [UsedImplicitly]
 public record Caselog
 {
-    public Snowflake UserID { get; set; } = default!;
-    public CaselogType Type { get; set; }
-    public TimeSpan? Time { get; set; }
-    public Snowflake ModID { get; set; } = default!;
-    public string Reason { get; set; } = default!;
-    [JsonConverter(typeof(UnixMillisecondDateTimeConverter))]
+    [UsedImplicitly] public Snowflake UserID { get; set; } = default!;
+    [UsedImplicitly] public CaselogType Type { get; set; }
+    [UsedImplicitly] public TimeSpan? Time { get; set; }
+    [UsedImplicitly] public Snowflake ModID { get; set; } = default!;
+    [UsedImplicitly] public string Reason { get; set; } = default!;
+
+    [JsonConverter(typeof(UnixMillisecondDateTimeConverter)), UsedImplicitly]
     public DateTime Date { get; set; }
-    public int CaseNum { get; set; }
+
+    [UsedImplicitly] public int CaseNum { get; set; }
 }

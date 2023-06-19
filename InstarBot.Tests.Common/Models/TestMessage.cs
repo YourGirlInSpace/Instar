@@ -7,17 +7,8 @@ namespace InstarBot.Tests.Models;
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
 public class TestMessage : IMessage
 {
-    internal TestMessage(Snowflake userId, string message)
-    {
-        Id = Snowflake.Generate();
-        CreatedAt = DateTimeOffset.Now;
-        Timestamp = DateTimeOffset.Now;
-        Author = new TestGuildUser(userId);
 
-        Content = message;
-    }
-
-    internal TestMessage(IGuildUser user, string message)
+    internal TestMessage(IUser user, string message)
     {
         Id = Snowflake.Generate();
         CreatedAt = DateTimeOffset.Now;
@@ -74,7 +65,7 @@ public class TestMessage : IMessage
     public bool MentionedEveryone { get; set; } = default;
     public string Content { get; set; }
     public string CleanContent { get; set; } = default!;
-    public DateTimeOffset Timestamp { get; set; } = default;
+    public DateTimeOffset Timestamp { get; set; }
     public DateTimeOffset? EditedTimestamp { get; set; } = default;
     public IMessageChannel Channel { get; set; } = default!;
     public IUser Author { get; set; }

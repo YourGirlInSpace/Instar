@@ -90,7 +90,7 @@ public class TeamService
 
             var st = Get(role);
 
-            Log.Debug("Team role found: {Role} with internal ID {InternalID}", role, st.InternalID);
+            Log.Debug("Team role found: {Role} with internal ID {InternalID}", role.ID, st.InternalID);
 
             // Set the team if it is null
             highestTeam ??= st;
@@ -99,7 +99,7 @@ public class TeamService
         }
 
         if (highestTeam is not null)
-            Log.Debug("Highest team: {TeamID} {TeamName}", highestTeam.ID, highestTeam.Name);
+            Log.Debug("Highest team: {TeamID} {TeamName}", highestTeam.ID.ID, highestTeam.Name);
         else Log.Debug("Highest team was not found");
 
         return highestTeam;

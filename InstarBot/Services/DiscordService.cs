@@ -45,6 +45,7 @@ public class DiscordService : IDiscordService
         _socketClient.Log += HandleDiscordLog;
         _socketClient.InteractionCreated += HandleInteraction;
         _socketClient.MessageCommandExecuted += HandleMessageCommand;
+        _socketClient.GuildMembersDownloaded += SocketClientOnGuildMembersDownloaded;
         _interactionService.Log += HandleDiscordLog;
 
         _contextCommands = provider.GetServices<IContextCommand>().ToDictionary(n => n.Name, n => n);

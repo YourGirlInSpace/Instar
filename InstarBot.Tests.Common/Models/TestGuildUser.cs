@@ -1,25 +1,15 @@
 using System.Diagnostics.CodeAnalysis;
 using Discord;
-using PaxAndromeda.Instar;
 
 #pragma warning disable CS8625
 
 namespace InstarBot.Tests.Models;
 
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+[SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
 public class TestGuildUser : IGuildUser
 {
     private readonly List<ulong> _roleIds = null!;
-
-    public TestGuildUser()
-    {
-    }
-
-    internal TestGuildUser(Snowflake userId)
-    {
-        Id = userId;
-        CreatedAt = userId.Time;
-    }
 
     public ulong Id { get; init; }
     public DateTimeOffset CreatedAt { get; set; }

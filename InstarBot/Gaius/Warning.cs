@@ -7,14 +7,18 @@ namespace PaxAndromeda.Instar.Gaius;
 [UsedImplicitly]
 public record Warning
 {
-    public Snowflake GuildID { get; set; } = default!;
-    public int WarnID { get; set; }
-    public Snowflake UserID { get; set; } = default!;
-    public string Reason { get; set; } = default!;
-    [JsonConverter(typeof(UnixDateTimeConverter))]
+    [UsedImplicitly] public Snowflake GuildID { get; set; } = default!;
+    [UsedImplicitly] public int WarnID { get; set; }
+    [UsedImplicitly] public Snowflake UserID { get; set; } = default!;
+    [UsedImplicitly] public string Reason { get; set; } = default!;
+
+    [JsonConverter(typeof(UnixDateTimeConverter)), UsedImplicitly]
     public DateTime WarnDate { get; set; }
-    public Snowflake? PardonerID { get; set; }
-    [JsonConverter(typeof(UnixDateTimeConverter))]
+
+    [UsedImplicitly] public Snowflake? PardonerID { get; set; }
+
+    [JsonConverter(typeof(UnixDateTimeConverter)), UsedImplicitly]
     public DateTime? PardonDate { get; set; }
-    public Snowflake ModID { get; set; } = default!;
+
+    [UsedImplicitly] public Snowflake ModID { get; set; } = default!;
 }

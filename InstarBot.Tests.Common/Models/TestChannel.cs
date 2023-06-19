@@ -286,11 +286,6 @@ public class TestChannel : ITextChannel
 
     private readonly List<TestMessage> _messages = new();
 
-    public void AddMessage(Snowflake userId, string message)
-    {
-        _messages.Add(new TestMessage(userId, message));
-    }
-
     public void AddMessage(IGuildUser user, string message)
     {
         _messages.Add(new TestMessage(user, message));

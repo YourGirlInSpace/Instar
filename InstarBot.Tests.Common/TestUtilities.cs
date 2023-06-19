@@ -100,23 +100,13 @@ public static class TestUtilities
     }
 
     public static IDiscordService SetupDiscordService(TestContext context = null!)
-    {
-        context ??= new TestContext();
-
-        return new MockDiscordService(SetupGuild(context));
-    }
+        => new MockDiscordService(SetupGuild(context));
 
     public static IGaiusAPIService SetupGaiusAPIService(TestContext context = null!)
-    {
-        context ??= new TestContext();
-        
-        return new MockGaiusAPIService(context.Warnings, context.Caselogs, context.InhibitGaius);
-    }
+        => new MockGaiusAPIService(context.Warnings, context.Caselogs, context.InhibitGaius);
 
-    public static IInstarGuild SetupGuild(TestContext context = null!)
+    private static IInstarGuild SetupGuild(TestContext context = null!)
     {
-        context ??= new TestContext();
-
         var guild = new TestGuild
         {
             Id = Snowflake.Generate(),

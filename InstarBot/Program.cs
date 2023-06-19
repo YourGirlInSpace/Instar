@@ -1,11 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using PaxAndromeda.Instar.Commands;
-using PaxAndromeda.Instar.Gaius;
 using PaxAndromeda.Instar.Services;
 using Serilog;
 using Serilog.Events;
@@ -29,7 +27,6 @@ internal static class Program
         const string configPath = "Config/Instar.conf.json";
         #endif
         
-#if !DEBUG
         // Initial check:  Is the configuration valid?
         try
         {
@@ -40,7 +37,6 @@ internal static class Program
             Log.Fatal(ex, "Malformed configuration!  Aborting!");
             return;
         }
-#endif
 
         IConfiguration config = new ConfigurationBuilder()
             .AddJsonFile(configPath)

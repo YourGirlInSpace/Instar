@@ -45,15 +45,7 @@ public class TestContext
         else
             Caselogs[userId].Add(caselog);
     }
-
-    public void AddUser(Snowflake userId)
-    {
-        if (GuildUsers.Any(n => n.Id == userId.ID))
-            return;
-
-        GuildUsers.Add(new TestGuildUser(userId));
-    }
-
+    
     public void AddChannel(Snowflake channelId)
     {
         if (Channels.ContainsKey(channelId))
