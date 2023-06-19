@@ -10,7 +10,7 @@ namespace PaxAndromeda.Instar.Converters;
 public class SnowflakeConverter : ConfigurationConverterBase
 {
     public override bool CanConvertFrom(
-        ITypeDescriptorContext ctx, Type type)
+        ITypeDescriptorContext? ctx, Type type)
     {
         return type == typeof(string);
     }

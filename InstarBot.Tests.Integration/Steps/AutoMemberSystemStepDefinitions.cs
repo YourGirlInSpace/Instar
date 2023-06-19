@@ -179,7 +179,7 @@ public class AutoMemberSystemStepDefinitions
         user.RoleIds.Should().NotContain(config.GetValue<ulong>("MemberRoleID"));
     }
 
-    [Given(@"Not been punished")]
+    [Given("Not been punished")]
     public void GivenNotBeenPunished()
     {
         // ignore
