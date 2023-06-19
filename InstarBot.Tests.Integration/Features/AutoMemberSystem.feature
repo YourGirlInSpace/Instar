@@ -13,7 +13,7 @@ Feature: Auto Member System
 			| 796085775199502357 | Transfemme |
 			| 796148869855576064 | 21+        |
 			| 796578609535647765 | She/Her    |
-			| 966434762032054282 | AMH		  |
+			| 966434762032054282 | AMH        |
 
 	Rule: Eligible users should be granted membership.
 		Scenario: A user eligible for membership should be granted membership
