@@ -40,6 +40,6 @@ jobs:
     - name: Generate Specflow Tests
       uses: cryptic-wizard/run-specflow-tests@v1.3.2
       with:
-        test-assembly-path: InstarBot.Tests.Integration/bin/Release/netcoreapp6.0
+        test-assembly-path: InstarBot.Tests.Integration/bin/Release/net6.0
         test-assembly-dll: InstarBot.Tests.Integration.dll
         output-html: IntegrationTestResults.html
