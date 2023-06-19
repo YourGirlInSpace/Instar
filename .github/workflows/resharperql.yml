@@ -25,4 +25,4 @@ jobs:
       uses: JetBrains/ReSharper-InspectCode@v0.2
       with:
         solution: ./InstarBot.sln
-        tool-version: 2023.2.0-EAP5
+        tool-version: 2023.2.0-EAP05
