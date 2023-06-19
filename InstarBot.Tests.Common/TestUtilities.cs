@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Discord;
 using Discord.Interactions;
 using FluentAssertions;
+using InstarBot.Tests.Models;
 using InstarBot.Tests.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using Moq;
 using Moq.Protected;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.Commands;
+using PaxAndromeda.Instar.ConfigModels;
 using PaxAndromeda.Instar.Services;
 using Xunit;
 
@@ -97,7 +99,36 @@ public static class TestUtilities
             ItExpr.IsAny<MessageComponent>(), ItExpr.IsAny<Embed>());
     }
 
-    public static Mock<T> SetupCommandMock<T>(Expression<Func<T>> newExpression, CommandMockContext context = null!)
+    public static IDiscordService SetupDiscordService(TestContext context = null!)
+    {
+        context ??= new TestContext();
+
+        return new MockDiscordService(SetupGuild(context));
+    }
+
+    public static IGaiusAPIService SetupGaiusAPIService(TestContext context = null!)
+    {
+        context ??= new TestContext();
+        
+        return new MockGaiusAPIService(context.Warnings, context.Caselogs, context.InhibitGaius);
+    }
+
+    public static IInstarGuild SetupGuild(TestContext context = null!)
+    {
+        context ??= new TestContext();
+
+        var guild = new TestGuild
+        {
+            Id = Snowflake.Generate(),
+            TextChannels = context.Channels.Values,
+            Roles = context.Roles.Values,
+            Users = context.GuildUsers
+        };
+
+        return guild;
+    }
+
+    public static Mock<T> SetupCommandMock<T>(Expression<Func<T>> newExpression, TestContext context = null!)
         where T : BaseCommand
     {
         var commandMock = new Mock<T>(newExpression);
@@ -105,7 +136,7 @@ public static class TestUtilities
         return commandMock;
     }
 
-    public static Mock<T> SetupCommandMock<T>(CommandMockContext context = null!)
+    public static Mock<T> SetupCommandMock<T>(TestContext context = null!)
         where T : BaseCommand
     {
         // Quick check:  Do we have a constructor that takes IConfiguration?
@@ -117,10 +148,10 @@ public static class TestUtilities
         return commandMock;
     }
 
-    private static void ConfigureCommandMock<T>(Mock<T> mock, CommandMockContext? context)
+    private static void ConfigureCommandMock<T>(Mock<T> mock, TestContext? context)
         where T : BaseCommand
     {
-        context ??= new CommandMockContext();
+        context ??= new TestContext();
 
         mock.SetupGet<InstarContext>(n => n.Context).Returns(SetupContext(context).Object);
 
@@ -132,7 +163,7 @@ public static class TestUtilities
             .Returns(Task.CompletedTask);
     }
 
-    public static Mock<InstarContext> SetupContext(CommandMockContext? context)
+    public static Mock<InstarContext> SetupContext(TestContext? context)
     {
         var mock = new Mock<InstarContext>();
 
@@ -144,7 +175,7 @@ public static class TestUtilities
         return mock;
     }
 
-    private static Mock<IInstarGuild> SetupGuildMock(CommandMockContext? context)
+    private static Mock<IInstarGuild> SetupGuildMock(TestContext? context)
     {
         context.Should().NotBeNull();
 
@@ -165,7 +196,7 @@ public static class TestUtilities
         return userMock;
     }
 
-    private static Mock<T> SetupUserMock<T>(CommandMockContext? context)
+    private static Mock<T> SetupUserMock<T>(TestContext? context)
         where T : class, IUser
     {
         var userMock = SetupUserMock<T>(context!.UserID);
@@ -185,7 +216,7 @@ public static class TestUtilities
         return channelMock;
     }
 
-    private static Mock<T> SetupChannelMock<T>(CommandMockContext? context)
+    private static Mock<T> SetupChannelMock<T>(TestContext? context)
         where T : class, IChannel
     {
         var channelMock = SetupChannelMock<T>(context!.ChannelID);

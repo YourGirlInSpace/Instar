@@ -25,7 +25,7 @@ namespace PaxAndromeda.Instar;
 ///         this number is incremented.
 /// </remarks>
 [TypeConverter(typeof(SnowflakeConverter))]
-public record Snowflake
+public sealed class Snowflake : IEquatable<Snowflake>
 {
     private static int _increment;
 
@@ -144,6 +144,21 @@ public record Snowflake
         return snowflake.Time;
     }
 
+    public static Snowflake Parse(string input)
+    {
+        return ulong.Parse(input);
+    }
+
+    public static bool TryParse(string input, out Snowflake snowflake)
+    {
+        snowflake = default!;
+        if (!ulong.TryParse(input, out var rawId))
+            return false;
+
+        snowflake = new Snowflake(rawId);
+        return true;
+    }
+
     /// <summary>
     /// Generates a new snowflake from the current time.
     /// </summary>
@@ -204,5 +219,17 @@ public record Snowflake
             SnowflakeType.Channel => $"<#{snowflake.ID}>",
             _ => throw new InvalidOperationException($"Cannot mention ID type {snowflakeType}")
         };
+    }
+
+    public bool Equals(Snowflake? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return ID == other.ID;
+    }
+
+    public override int GetHashCode()
+    {
+        return ID.GetHashCode();
     }
 }

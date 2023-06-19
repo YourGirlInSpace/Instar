@@ -19,9 +19,15 @@ public class SocketGuildWrapper : IInstarGuild
     }
 
     public virtual ulong Id => _guild.Id;
+    public IEnumerable<ITextChannel> TextChannels => _guild.TextChannels;
 
     public virtual ITextChannel GetTextChannel(ulong channelId)
     {
         return _guild.GetTextChannel(channelId);
+    }
+
+    public IRole GetRole(Snowflake roleId)
+    {
+        return _guild.GetRole(roleId);
     }
 }

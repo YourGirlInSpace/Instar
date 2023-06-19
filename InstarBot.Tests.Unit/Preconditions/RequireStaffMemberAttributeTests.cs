@@ -23,7 +23,7 @@ public class RequireStaffMemberAttributeTests
             .AddInMemoryCollection(new Dictionary<string, string?>())
             .Build());
 
-        var context = TestUtilities.SetupContext(new CommandMockContext
+        var context = TestUtilities.SetupContext(new TestContext
         {
             UserRoles = new List<Snowflake>
             {
@@ -60,7 +60,7 @@ public class RequireStaffMemberAttributeTests
         // Arrange
         var attr = new RequireStaffMemberAttribute();
 
-        var context = TestUtilities.SetupContext(new CommandMockContext
+        var context = TestUtilities.SetupContext(new TestContext
         {
             UserRoles = new List<Snowflake>
             {
@@ -81,7 +81,7 @@ public class RequireStaffMemberAttributeTests
         // Arrange
         var attr = new RequireStaffMemberAttribute();
 
-        var context = TestUtilities.SetupContext(new CommandMockContext
+        var context = TestUtilities.SetupContext(new TestContext
         {
             UserRoles = new List<Snowflake>
             {

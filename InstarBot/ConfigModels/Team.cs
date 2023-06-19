@@ -1,7 +1,7 @@
 ﻿using System.Configuration;
 using JetBrains.Annotations;
 
-namespace PaxAndromeda.Instar;
+namespace PaxAndromeda.Instar.ConfigModels;
 
 public class Team
 {

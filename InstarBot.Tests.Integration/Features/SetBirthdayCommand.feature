@@ -1,5 +1,9 @@
-Feature: SetBirthdayCommand
-Test set for the Page command.
+@interactions
+Feature: Set Birthday Command
+    
+    The Set Birthday command allows users to set
+    their own birthdays, which is used within the
+    Birthday system.
 
     Scenario: User should be able to set a valid birthday
         Given the user provides the following parameters

@@ -3,6 +3,7 @@ using Ardalis.GuardClauses;
 using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
+using PaxAndromeda.Instar.ConfigModels;
 using PaxAndromeda.Instar.Preconditions;
 using PaxAndromeda.Instar.Services;
 using Serilog;

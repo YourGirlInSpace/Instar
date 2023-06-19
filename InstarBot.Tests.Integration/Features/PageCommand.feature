@@ -1,5 +1,14 @@
-Feature: PageCommand
-Test set for the Page command.
+@interactions
+@staff
+Feature: Page Command
+
+    The Page command is a staff-only utility to page specific
+    staff teams without needing to allow pinging of the team's
+    role to everybody.
+    
+    The command also permits several contextual parameters
+    that allow responding staff members to obtain context on
+    a situation quickly and efficiently.
 
     Scenario: User should be able to page when authorized
         Given the user is in team Owner

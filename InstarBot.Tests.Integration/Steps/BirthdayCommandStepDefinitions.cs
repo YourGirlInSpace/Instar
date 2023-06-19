@@ -46,7 +46,7 @@ public class BirthdayCommandStepDefinitions
         var userId = new Snowflake().ID;
 
         var ddbService = TestUtilities.GetServices().GetService<IInstarDDBService>();
-        var cmd = TestUtilities.SetupCommandMock(() => new SetBirthdayCommand(ddbService!), new CommandMockContext
+        var cmd = TestUtilities.SetupCommandMock(() => new SetBirthdayCommand(ddbService!), new TestContext
         {
             UserID = userId
         });

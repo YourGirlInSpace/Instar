@@ -12,7 +12,7 @@ using Serilog.Events;
 namespace PaxAndromeda.Instar.Services;
 
 [ExcludeFromCodeCoverage]
-public class DiscordService
+public class DiscordService : IDiscordService
 {
     private readonly string _botToken;
 
@@ -21,6 +21,7 @@ public class DiscordService
     private readonly InteractionService _interactionService;
     private readonly IServiceProvider _provider;
     private readonly DiscordSocketClient _socketClient;
+    private TaskCompletionSource<SocketGuild>? _guildDownloadCompletionSource;
 
     public DiscordService(IServiceProvider provider, IConfiguration config)
     {
@@ -56,6 +57,12 @@ public class DiscordService
             throw new ConfigurationException("TargetGuild is not set");
         if (string.IsNullOrEmpty(_botToken))
             throw new ConfigurationException("Token is not set");
+    }
+
+    private Task SocketClientOnGuildMembersDownloaded(SocketGuild arg)
+    {
+        _guildDownloadCompletionSource?.TrySetResult(arg);
+        return Task.CompletedTask;
     }
 
     private async Task HandleMessageCommand(SocketMessageCommand arg)
@@ -148,5 +155,27 @@ public class DiscordService
         Log.Information("Stopping!");
         await _socketClient.StopAsync();
         await _socketClient.LogoutAsync();
+    }
+
+    public IInstarGuild GetGuild()
+    {
+        return new SocketGuildWrapper(_socketClient.GetGuild(_guild));
+    }
+
+    public async Task<IEnumerable<IGuildUser>> GetAllUsers()
+    {
+        var guild = _socketClient.GetGuild(_guild);
+        _guildDownloadCompletionSource = new TaskCompletionSource<SocketGuild>();
+        await _socketClient.DownloadUsersAsync(new []{ guild });
+
+        await _guildDownloadCompletionSource.Task;
+        var result = _guildDownloadCompletionSource.Task.Result;
+
+        return result.Users;
+    }
+
+    public async Task<IChannel> GetChannel(Snowflake channelId)
+    {
+        return await _socketClient.GetChannelAsync(channelId);
     }
 }

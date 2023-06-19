@@ -14,6 +14,9 @@
     "Token": {
       "type": "string"
     },
+    "GaiusAPIKey": {
+      "type": "string"
+    },
     "AWS": {
       "type": "object",
       "properties": {
@@ -39,6 +42,12 @@
     "StaffRoleID": {
       "type": "integer"
     },
+    "NewMemberRoleID": {
+      "type": "integer"
+    },
+    "MemberRoleID": {
+      "type": "integer"
+    },
     "AuthorizedStaffID": {
       "type": "array",
       "items": [
@@ -48,6 +57,156 @@
         {
           "type": "integer"
         }
+      ]
+    },
+    "AutoMemberConfig": {
+      "type": "object",
+      "properties": {
+        "HoldRole": {
+          "type": "integer"
+        },
+        "IntroductionChannel": {
+          "type": "integer"
+        },
+        "MinimumJoinAge": {
+          "type": "integer"
+        },
+        "MinimumMessages": {
+          "type": "integer"
+        },
+        "MinimumMessageTime": {
+          "type": "integer"
+        },
+        "RequiredRoles": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "GroupName": {
+                  "type": "string"
+                },
+                "Roles": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "GroupName",
+                "Roles"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "GroupName": {
+                  "type": "string"
+                },
+                "Roles": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "GroupName",
+                "Roles"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "GroupName": {
+                  "type": "string"
+                },
+                "Roles": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "GroupName",
+                "Roles"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "HoldRole",
+        "IntroductionChannel",
+        "MinimumJoinAge",
+        "MinimumMessages",
+        "MinimumMessageTime",
+        "RequiredRoles"
       ]
     },
     "Teams": {
@@ -216,10 +375,15 @@
     "TargetGuild",
     "TargetChannel",
     "Token",
+    "GaiusAPIKey",
     "AWS",
     "StaffAnnounceChannel",
     "StaffRoleID",
+    "NewMemberRoleID",
+    "MemberRoleID",
     "AuthorizedStaffID",
+    "AutoMemberConfig",
     "Teams"
   ]
 }
+

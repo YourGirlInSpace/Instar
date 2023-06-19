@@ -91,7 +91,7 @@ public class ReportUserCommandStepDefinitions
 
     private (Mock<ReportUserCommand>, Mock<IInstarMessageCommandInteraction>) SetupMocks()
     {
-        var commandMockContext = new CommandMockContext
+        var commandMockContext = new TestContext
         {
             UserID = _context.Get<ulong>("ReportingUserID"),
             EmbedCallback = embed => _context.Add("ResultEmbed", embed)

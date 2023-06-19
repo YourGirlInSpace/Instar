@@ -6,6 +6,7 @@ using Moq;
 using Moq.Protected;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.Commands;
+using PaxAndromeda.Instar.ConfigModels;
 
 namespace InstarBot.Tests.Integration;
 
@@ -137,7 +138,7 @@ public sealed class PageCommandStepDefinitions
 
         var commandMock = TestUtilities.SetupCommandMock(
             () => new PageCommand(TestUtilities.GetTeamService()),
-            new CommandMockContext
+            new TestContext
             {
                 UserRoles = new List<Snowflake> { userTeam }
             });

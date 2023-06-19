@@ -1,5 +1,9 @@
-Feature: ReportUserCommand
-Simple calculator for adding two numbers
+@interactions
+Feature: Report User Command
+
+    The Report User interaction allows users to report
+    users and messages quietly without alerting the
+    reported user.
 
     Scenario: User should be able to report a message normally
         When the user 1024 reports a message with the following properties

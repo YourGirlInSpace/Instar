@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Ardalis.GuardClauses;
 using Discord;
 using Microsoft.Extensions.Configuration;
+using PaxAndromeda.Instar.ConfigModels;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Services;
@@ -17,8 +18,7 @@ public class TeamService
     {
         var teamList = config.GetSection("Teams").Get<List<Team>>();
         Guard.Against.Null(teamList);
-
-
+        
         var teamsConfig = teamList.ToDictionary(n => n.InternalID, n => n);
         var teamIdRefMap = teamList.ToDictionary(n => n.ID, n => n.InternalID);
 
