@@ -38,7 +38,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Generate Specflow Tests
-      uses: actions/cryptic-wizard/run-specflow-tests@v1.3.1
+      uses: cryptic-wizard/run-specflow-tests@v1.3.2
       with:
         test-assembly-path: InstarBot.Tests.Integration/bin/Release/netcoreapp6.0
         test-assembly-dll: InstarBot.Tests.Integration.dll
