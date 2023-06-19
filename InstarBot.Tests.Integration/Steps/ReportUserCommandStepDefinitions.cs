@@ -19,7 +19,7 @@ public class ReportUserCommandStepDefinitions
         _context = context;
     }
 
-    [When(@"the user (.*) reports a message with the following properties")]
+    [When("the user (.*) reports a message with the following properties")]
     public async Task WhenTheUserReportsAMessageWithTheFollowingProperties(ulong userId, Table table)
     {
         _context.Add("ReportingUserID", userId);
@@ -41,7 +41,7 @@ public class ReportUserCommandStepDefinitions
         await command.Object.HandleCommand(interactionContext.Object);
     }
 
-    [When(@"does not complete the modal within 5 minutes")]
+    [When("does not complete the modal within 5 minutes")]
     public async Task WhenDoesNotCompleteTheModalWithinMinutes()
     {
         Assert.True(_context.ContainsKey("Command"));
@@ -69,7 +69,7 @@ public class ReportUserCommandStepDefinitions
         });
     }
 
-    [Then(@"Instar should emit a message report embed")]
+    [Then("Instar should emit a message report embed")]
     public void ThenInstarShouldEmitAMessageReportEmbed()
     {
         Assert.True(_context.ContainsKey("TextChannelMock"));

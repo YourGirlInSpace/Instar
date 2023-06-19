@@ -12,7 +12,7 @@ public class PingCommandStepDefinitions
         _context = context;
     }
 
-    [When(@"the user calls the Ping command")]
+    [When("the user calls the Ping command")]
     public async Task WhenTheUserCallsThePingCommand()
     {
         var command = TestUtilities.SetupCommandMock<PingCommand>();

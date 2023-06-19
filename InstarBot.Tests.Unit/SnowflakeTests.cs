@@ -27,7 +27,7 @@ public class SnowflakeTests
 
     private static ulong GenerateSnowflakeFromTimestamp(DateTime time)
     {
-        const long DiscordEpoch = 1420070400000;
+        const long discordEpoch = 1420070400000;
 
         if (time.Kind != DateTimeKind.Utc)
             time = time.ToUniversalTime();
@@ -35,7 +35,7 @@ public class SnowflakeTests
         var epoch = new DateTime(1970, 1, 1);
         var ms = (long)(time - epoch).TotalMilliseconds;
 
-        return (ulong)((ms - DiscordEpoch) << 22);
+        return (ulong)((ms - discordEpoch) << 22);
     }
 
     [Fact]
@@ -63,13 +63,13 @@ public class SnowflakeTests
     {
         // Arrange
         var time = new DateTime(2016, 4, 30, 11, 18, 25, 796, DateTimeKind.Utc);
-        var ExpectedSnowflake = GenerateSnowflakeFromTimestamp(time);
+        var expectedSnowflake = GenerateSnowflakeFromTimestamp(time);
 
         // Act
         var snowflake = new Snowflake(time);
 
         // Assert
-        snowflake.ID.Should().Be(ExpectedSnowflake);
+        snowflake.ID.Should().Be(expectedSnowflake);
         snowflake.Time.Should().Be(time);
         snowflake.InternalWorkerId.Should().Be(0);
         snowflake.InternalProcessId.Should().Be(0);
@@ -97,11 +97,11 @@ public class SnowflakeTests
     public void SnowflakeTooEarly_ShouldThrowArgumentException()
     {
         // Arrange
-        var DiscordSnowflake =
+        var discordSnowflake =
             GenerateSnowflakeFromTimestamp(new DateTime(2014, 4, 30, 11, 18, 25, 796, DateTimeKind.Utc));
 
         // Act
-        var act = () => new Snowflake(DiscordSnowflake);
+        var act = () => new Snowflake(discordSnowflake);
 
         // Assert
         act.Should().Throw<ArgumentException>();

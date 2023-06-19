@@ -12,23 +12,23 @@ namespace InstarBot.Tests.Integration;
 public class AutoMemberSystemStepDefinitions
 {
     private readonly ScenarioContext _scenarioContext;
-    private readonly Dictionary<string, ulong> RoleNameIDMap = new();
+    private readonly Dictionary<string, ulong> _roleNameIDMap = new();
 
     public AutoMemberSystemStepDefinitions(ScenarioContext scenarioContext)
     {
         _scenarioContext = scenarioContext;
     }
 
-    [Given(@"the roles as follows:")]
+    [Given("the roles as follows:")]
     public void GivenTheRolesAsFollows(Table table)
     {
         foreach (var row in table.Rows)
         {
-            RoleNameIDMap.Add(row["Role Name"], ulong.Parse(row["Role ID"]));
+            _roleNameIDMap.Add(row["Role Name"], ulong.Parse(row["Role ID"]));
         }
     }
 
-    [When(@"the Auto Member System processes")]
+    [When("the Auto Member System processes")]
     public async Task WhenTheAutoMemberSystemProcesses()
     {
         var context = _scenarioContext.Get<TestContext>("Context");
@@ -73,7 +73,7 @@ public class AutoMemberSystemStepDefinitions
         await ams.RunAsync();
     }
 
-    [Then(@"the user should remain unchanged")]
+    [Then("the user should remain unchanged")]
     public void ThenTheUserShouldRemainUnchanged()
     {
         var userId = _scenarioContext.Get<Snowflake>("UserID");
@@ -84,7 +84,7 @@ public class AutoMemberSystemStepDefinitions
         user!.Changed.Should().BeFalse();
     }
 
-    [Given(@"Been issued a warning")]
+    [Given("Been issued a warning")]
     public void GivenBeenIssuedAWarning()
     {
         var userId = _scenarioContext.Get<Snowflake>("UserID");
@@ -97,7 +97,7 @@ public class AutoMemberSystemStepDefinitions
         });
     }
 
-    [Given(@"Been issued a mute")]
+    [Given("Been issued a mute")]
     public void GivenBeenIssuedAMute()
     {
         var userId = _scenarioContext.Get<Snowflake>("UserID");
@@ -111,14 +111,14 @@ public class AutoMemberSystemStepDefinitions
         });
     }
 
-    [Given(@"the Gaius API is not available")]
+    [Given("the Gaius API is not available")]
     public void GivenTheGaiusApiIsNotAvailable()
     {
         var context = _scenarioContext.Get<TestContext>("Context");
         context.InhibitGaius = true;
     }
 
-    [Given(@"a user that has:")]
+    [Given("a user that has:")]
     public void GivenAUserThatHas()
     {
         var config = TestUtilities.GetTestConfiguration();
@@ -132,30 +132,30 @@ public class AutoMemberSystemStepDefinitions
         _scenarioContext.Add("UserID", userId);
     }
 
-    [Given(@"Joined (.*) hours ago")]
+    [Given("Joined (.*) hours ago")]
     public void GivenJoinedHoursAgo(int ageHours) => _scenarioContext.Add("UserAge", ageHours);
 
-    [Given(@"The roles (.*)")]
+    [Given("The roles (.*)")]
     public void GivenTheRoles(string roles)
     {
         var roleNames = roles.Split(new[] { ",", "and" },
             StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
-        var roleIds = roleNames.Select(roleName => RoleNameIDMap[roleName]).ToArray();
+        var roleIds = roleNames.Select(roleName => _roleNameIDMap[roleName]).ToArray();
         
         _scenarioContext.Add("UserRoles", roleIds);
     }
 
-    [Given(@"Posted an introduction")]
+    [Given("Posted an introduction")]
     public void GivenPostedAnIntroduction() => _scenarioContext.Add("UserPostedIntroduction", true);
 
-    [Given(@"Did not post an introduction")]
+    [Given("Did not post an introduction")]
     public void GivenDidNotPostAnIntroduction() => _scenarioContext.Add("UserPostedIntroduction", false);
 
-    [Given(@"Posted (.*) messages in the past day")]
+    [Given("Posted (.*) messages in the past day")]
     public void GivenPostedMessagesInThePastDay(int numMessages) => _scenarioContext.Add("UserMessagesPast24Hours", numMessages);
 
-    [Then(@"the user should be granted membership")]
+    [Then("the user should be granted membership")]
     public void ThenTheUserShouldBeGrantedMembership()
     {
         var userId = _scenarioContext.Get<Snowflake>("UserID");
@@ -167,7 +167,7 @@ public class AutoMemberSystemStepDefinitions
         user.RoleIds.Should().NotContain(config.GetValue<ulong>("NewMemberRoleID"));
     }
 
-    [Then(@"the user should not be granted membership")]
+    [Then("the user should not be granted membership")]
     public void ThenTheUserShouldNotBeGrantedMembership()
     {
         var userId = _scenarioContext.Get<Snowflake>("UserID");

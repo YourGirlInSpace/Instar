@@ -19,7 +19,7 @@ public class BirthdayCommandStepDefinitions
         _context = context;
     }
 
-    [Given(@"the user provides the following parameters")]
+    [Given("the user provides the following parameters")]
     public void GivenTheUserProvidesTheFollowingParameters(Table table)
     {
         var dict = table.Rows.ToDictionary(n => n["Key"], n => n.GetInt32("Value"));
@@ -35,7 +35,7 @@ public class BirthdayCommandStepDefinitions
             _context.Add("Timezone", value);
     }
 
-    [When(@"the user calls the Set Birthday command")]
+    [When("the user calls the Set Birthday command")]
     public async Task WhenTheUserCallsTheSetBirthdayCommand()
     {
         var year = _context.Get<int>("Year");
@@ -57,7 +57,7 @@ public class BirthdayCommandStepDefinitions
         await cmd.Object.SetBirthday((Month)month, day, year, timezone);
     }
 
-    [Then(@"DynamoDB should have the user's (Birthday|JoinDate) set to (.*)")]
+    [Then("DynamoDB should have the user's (Birthday|JoinDate) set to (.*)")]
     [SuppressMessage("ReSharper", "SpecFlow.MethodNameMismatchPattern")]
     public async Task ThenDynamoDbShouldHaveBirthdaySetTo(string dataType, DateTime time)
     {

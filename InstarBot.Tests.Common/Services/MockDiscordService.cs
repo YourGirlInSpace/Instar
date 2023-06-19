@@ -14,16 +14,6 @@ public class MockDiscordService : IDiscordService
         _guild = guild;
     }
 
-    public Task Start(IServiceProvider provider)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task Stop()
-    {
-        return Task.CompletedTask;
-    }
-
     public IInstarGuild GetGuild()
     {
         return _guild;
