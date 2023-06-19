@@ -7,9 +7,6 @@ on:
     branches: [ "master" ]
   workflow_dispatch:
 
-permissions:
-  security-events: write
-  
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -24,8 +21,11 @@ jobs:
       run: dotnet restore
     - name: JetBrains ReSharper Inspect Code
       # You may pin to the exact commit or the version.
-      # uses: JetBrains/ReSharper-InspectCode@83660dfd63621bfb6ccea5e16c047ce182f2d4e1
       uses: JetBrains/ReSharper-InspectCode@v0.2
       with:
         solution: ./InstarBot.sln
         tool-version: 2023.2.0-EAP05
+    permissions:
+      security-events: write
+  
+
