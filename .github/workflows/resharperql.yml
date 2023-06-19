@@ -5,7 +5,8 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
+  workflow_dispatch:
+  
 jobs:
   analyze:
     runs-on: ubuntu-latest
@@ -15,12 +16,12 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: '6.0.x'
     - name: Restore dependencies
       run: dotnet restore
     - name: JetBrains ReSharper Inspect Code
       # You may pin to the exact commit or the version.
       # uses: JetBrains/ReSharper-InspectCode@83660dfd63621bfb6ccea5e16c047ce182f2d4e1
-      uses: JetBrains/ReSharper-InspectCode@v0.2
+      uses: JetBrains/ReSharper-InspectCode@v0.2-beta
       with:
         solution: ./InstarBot.sln
