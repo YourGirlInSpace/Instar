@@ -2,10 +2,17 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using PaxAndromeda.Instar.Gaius;
 
+#if !DEBUG
+using System.Text;
+#endif
+
 namespace PaxAndromeda.Instar.Services;
 
 public sealed class GaiusAPIService : IGaiusAPIService
 {
+    // Used in release mode
+    // ReSharper disable once NotAccessedField.Local
+    private readonly IConfiguration _config;
     private const string BaseURL = "https://api.gaiusbot.me";
     private const string WarningsBaseURL = BaseURL + "/warnings";
     private const string CaselogsBaseURL = BaseURL + "/caselogs";
@@ -14,6 +21,7 @@ public sealed class GaiusAPIService : IGaiusAPIService
     private readonly string _apiKey;
     public GaiusAPIService(IConfiguration config)
     {
+        _config = config;
         _apiKey = config.GetValue<string>("GaiusAPIKey")!;
         _client = new HttpClient();
 
