@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace PaxAndromeda.Instar.ConfigModels;
 
-public class Team
+public sealed class Team
 {
     public string InternalID { get; [UsedImplicitly] set; } = null!;
     public string Name { get; [UsedImplicitly] set; } = null!;

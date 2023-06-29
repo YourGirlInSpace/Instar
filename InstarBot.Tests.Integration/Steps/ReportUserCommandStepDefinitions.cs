@@ -1,5 +1,6 @@
 using Discord;
 using FluentAssertions;
+using InstarBot.Tests.Services;
 using Moq;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.Commands;
@@ -98,7 +99,9 @@ public class ReportUserCommandStepDefinitions
         };
 
         var commandMock =
-            TestUtilities.SetupCommandMock<ReportUserCommand>(commandMockContext);
+            TestUtilities.SetupCommandMock
+            (() => new ReportUserCommand(TestUtilities.GetTestConfiguration(), new MockMetricService()),
+                commandMockContext);
         _context.Add("TextChannelMock", commandMockContext.TextChannelMock);
 
         return (commandMock, SetupMessageCommandMock());

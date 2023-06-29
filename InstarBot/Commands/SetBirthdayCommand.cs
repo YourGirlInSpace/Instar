@@ -3,18 +3,23 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using PaxAndromeda.Instar.Metrics;
 using PaxAndromeda.Instar.Services;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
+// Required to be unsealed for mocking
+[SuppressMessage("ReSharper", "ClassCanBeSealed.Global")]
 public class SetBirthdayCommand : BaseCommand
 {
     private readonly IInstarDDBService _ddbService;
+    private readonly IMetricService _metricService;
 
-    public SetBirthdayCommand(IInstarDDBService ddbService)
+    public SetBirthdayCommand(IInstarDDBService ddbService, IMetricService metricService)
     {
         _ddbService = ddbService;
+        _metricService = metricService;
     }
 
     [UsedImplicitly]
@@ -73,6 +78,7 @@ public class SetBirthdayCommand : BaseCommand
                 dtLocal, dtUtc);
 
             await RespondAsync($"Your birthday was set to {dtLocal:D}.", ephemeral: true);
+            await _metricService.Emit(Metric.BS_BirthdaysSet, 1);
         }
         else
         {

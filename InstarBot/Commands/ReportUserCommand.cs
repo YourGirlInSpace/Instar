@@ -3,13 +3,18 @@ using System.Runtime.Caching;
 using Discord;
 using Discord.Interactions;
 using Microsoft.Extensions.Configuration;
+using PaxAndromeda.Instar.Metrics;
 using PaxAndromeda.Instar.Modals;
+using PaxAndromeda.Instar.Services;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
+// Required to be unsealed for mocking
+[SuppressMessage("ReSharper", "ClassCanBeSealed.Global")]
 public class ReportUserCommand : BaseCommand, IContextCommand
 {
+    private readonly IMetricService _metricService;
     private const string ModalId = "respond_modal";
 
     private static readonly MemoryCache Cache = new("User Report Cache");
@@ -24,8 +29,9 @@ public class ReportUserCommand : BaseCommand, IContextCommand
             Cache.Remove(n.Key, CacheEntryRemovedReason.Removed);
     }
 
-    public ReportUserCommand(IConfiguration config)
+    public ReportUserCommand(IConfiguration config, IMetricService metricService)
     {
+        _metricService = metricService;
         _staffAnnounceChannel = config.GetValue<ulong>("StaffAnnounceChannel");
 
 #if !DEBUG
@@ -123,5 +129,7 @@ public class ReportUserCommand : BaseCommand, IContextCommand
         await
             Context.Guild.GetTextChannel(_staffAnnounceChannel)
                 .SendMessageAsync(staffPing, embed: builder.Build());
+
+        await _metricService.Emit(Metric.ReportUser_ReportsSent, 1);
     }
 }

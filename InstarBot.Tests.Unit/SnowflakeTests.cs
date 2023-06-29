@@ -5,7 +5,7 @@ using Xunit;
 
 namespace InstarBot.Tests;
 
-public class SnowflakeTests
+public sealed class SnowflakeTests
 {
     // This snowflake has a time of 2016-04-30 11:18:25.769 UTC, and a generated ID of 7
     private const ulong DefaultTestSnowflake = 175928847299117063;

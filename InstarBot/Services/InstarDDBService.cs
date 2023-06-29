@@ -8,7 +8,7 @@ using Serilog;
 namespace PaxAndromeda.Instar.Services;
 
 [ExcludeFromCodeCoverage]
-public class InstarDDBService : IInstarDDBService
+public sealed class InstarDDBService : IInstarDDBService
 {
     private const string TableName = "UserData";
     private const string PrimaryKey = "UserID";
@@ -37,6 +37,13 @@ public class InstarDDBService : IInstarDDBService
             (DynamoDBEntry)joinDate.ToString(DateTimeFormat));
     }
 
+    public async Task<bool> UpdateUserMembership(Snowflake snowflake, bool membershipGranted)
+    {
+        return await UpdateUserData(snowflake,
+            DataType.Membership,
+            (DynamoDBEntry)membershipGranted);
+    }
+
     public async Task<DateTime?> GetUserBirthday(Snowflake snowflake)
     {
         var entry = await GetUserData(snowflake, DataType.Birthday);
@@ -47,6 +54,12 @@ public class InstarDDBService : IInstarDDBService
     {
         var entry = await GetUserData(snowflake, DataType.JoinDate);
         return entry?.AsDateTime();
+    }
+
+    public async Task<bool?> GetUserMembership(Snowflake snowflake)
+    {
+        var entry = await GetUserData(snowflake, DataType.Membership);
+        return entry?.AsBoolean();
     }
 
     private async Task<bool> UpdateUserData<T>(Snowflake snowflake, DataType dataType, T data)
@@ -98,6 +111,7 @@ public class InstarDDBService : IInstarDDBService
     private enum DataType
     {
         Birthday,
-        JoinDate
+        JoinDate,
+        Membership
     }
 }

@@ -8,7 +8,7 @@ using PaxAndromeda.Instar;
 namespace InstarBot.Tests.Models;
 
 [SuppressMessage("ReSharper", "ReplaceAutoPropertyWithComputedProperty")]
-public class TestChannel : ITextChannel
+public sealed class TestChannel : ITextChannel
 {
     public TestChannel(Snowflake id)
     {

@@ -1,5 +1,7 @@
+using Discord;
 using FluentAssertions;
 using InstarBot.Tests.Models;
+using InstarBot.Tests.Services;
 using Microsoft.Extensions.Configuration;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.ConfigModels;
@@ -28,22 +30,30 @@ public class AutoMemberSystemStepDefinitions
         }
     }
 
-    [When("the Auto Member System processes")]
-    public async Task WhenTheAutoMemberSystemProcesses()
+    private async Task<AutoMemberSystem> SetupTest()
     {
         var context = _scenarioContext.Get<TestContext>("Context");
         var discordService = TestUtilities.SetupDiscordService(context);
         var gaiusApiService = TestUtilities.SetupGaiusAPIService(context);
         var config = TestUtilities.GetTestConfiguration();
         _scenarioContext.Add("Config", config);
+        _scenarioContext.Add("DiscordService", discordService);
         
         var userId = _scenarioContext.Get<Snowflake>("UserID");
         var relativeJoinTime = _scenarioContext.Get<int>("UserAge");
         var roles = _scenarioContext.Get<ulong[]>("UserRoles").Select(roleId => new Snowflake(roleId)).ToArray();
         var postedIntro = _scenarioContext.Get<bool>("UserPostedIntroduction");
         var messagesLast24Hours = _scenarioContext.Get<int>("UserMessagesPast24Hours");
+        var firstSeenTime = _scenarioContext.ContainsKey("UserFirstJoinedTime") ? _scenarioContext.Get<int>("UserFirstJoinedTime") : 0;
+        var grantedMembershipBefore = _scenarioContext.ContainsKey("UserGrantedMembershipBefore") && _scenarioContext.Get<bool>("UserGrantedMembershipBefore");
         var amsConfig = _scenarioContext.Get<AutoMemberConfig>("AMSConfig");
 
+        var ddbService = new MockInstarDDBService();
+        if (firstSeenTime > 0)
+            await ddbService.UpdateUserJoinDate(userId, DateTime.UtcNow - TimeSpan.FromHours(firstSeenTime));
+        if (grantedMembershipBefore)
+            await ddbService.UpdateUserMembership(userId, grantedMembershipBefore);
+        
         context.AddRoles(roles);
 
         var user = new TestGuildUser
@@ -67,8 +77,17 @@ public class AutoMemberSystemStepDefinitions
             context.GetChannel(genericChannel).AddMessage(user, "Some text");
         
 
-        var ams = new AutoMemberSystem(config, discordService, gaiusApiService);
+        var ams = new AutoMemberSystem(config, discordService, gaiusApiService, ddbService, new MockMetricService());
         _scenarioContext.Add("AutoMemberSystem", ams);
+        _scenarioContext.Add("User", user);
+
+        return ams;
+    }
+
+    [When("the Auto Member System processes")]
+    public async Task WhenTheAutoMemberSystemProcesses()
+    {
+        var ams = await SetupTest();
 
         await ams.RunAsync();
     }
@@ -93,7 +112,8 @@ public class AutoMemberSystemStepDefinitions
         context.AddWarning(userId, new Warning
         {
             Reason = "TEST WARNING",
-            ModID = Snowflake.Generate()
+            ModID = Snowflake.Generate(),
+            UserID = userId
         });
     }
 
@@ -107,7 +127,8 @@ public class AutoMemberSystemStepDefinitions
         {
             Type = CaselogType.Mute,
             Reason = "TEST WARNING",
-            ModID = Snowflake.Generate()
+            ModID = Snowflake.Generate(),
+            UserID = userId
         });
     }
 
@@ -183,5 +204,27 @@ public class AutoMemberSystemStepDefinitions
     public void GivenNotBeenPunished()
     {
         // ignore
+    }
+
+    [Given(@"First joined (.*) hours ago")]
+    public void GivenFirstJoinedHoursAgo(int hoursAgo) => _scenarioContext.Add("UserFirstJoinedTime", hoursAgo);
+
+    [Given(@"Joined the server for the first time")]
+    public void GivenJoinedTheServerForTheFirstTime() => _scenarioContext.Add("UserFirstJoinedTime", 0);
+
+    [Given(@"Been granted membership before")]
+    public void GivenBeenGrantedMembershipBefore() => _scenarioContext.Add("UserGrantedMembershipBefore", true);
+
+    [Given(@"Not been granted membership before")]
+    public void GivenNotBeenGrantedMembershipBefore() => _scenarioContext.Add("UserGrantedMembershipBefore", false);
+
+    [When(@"the user joins the server")]
+    public async Task WhenTheUserJoinsTheServer()
+    {
+        await SetupTest();
+        var service = _scenarioContext.Get<IDiscordService>("DiscordService") as MockDiscordService;
+        var user = _scenarioContext.Get<IGuildUser>("User");
+
+        service?.TriggerUserJoined(user);
     }
 }

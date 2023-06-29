@@ -1,9 +1,12 @@
-﻿using Discord;
+﻿using System.Diagnostics.CodeAnalysis;
+using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 
 namespace PaxAndromeda.Instar.Commands;
 
+// Required to be unsealed for mocking
+[SuppressMessage("ReSharper", "ClassCanBeSealed.Global")]
 public class PingCommand : BaseCommand
 {
     [UsedImplicitly]

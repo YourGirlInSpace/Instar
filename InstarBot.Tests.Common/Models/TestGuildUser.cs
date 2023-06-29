@@ -7,7 +7,7 @@ namespace InstarBot.Tests.Models;
 
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
-public class TestGuildUser : IGuildUser
+public sealed class TestGuildUser : IGuildUser
 {
     private readonly List<ulong> _roleIds = null!;
 

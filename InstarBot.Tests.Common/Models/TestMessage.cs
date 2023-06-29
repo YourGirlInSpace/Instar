@@ -5,7 +5,7 @@ using PaxAndromeda.Instar;
 namespace InstarBot.Tests.Models;
 
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
-public class TestMessage : IMessage
+public sealed class TestMessage : IMessage
 {
 
     internal TestMessage(IUser user, string message)

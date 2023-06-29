@@ -7,7 +7,7 @@ using PaxAndromeda.Instar;
 namespace InstarBot.Tests.Models;
 
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
-public class TestRole : IRole
+public sealed class TestRole : IRole
 {
     internal TestRole(Snowflake snowflake)
     {

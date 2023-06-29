@@ -4,7 +4,7 @@ using PaxAndromeda.Instar.Services;
 
 namespace InstarBot.Tests.Services;
 
-public class MockGaiusAPIService : IGaiusAPIService
+public sealed class MockGaiusAPIService : IGaiusAPIService
 {
     private readonly Dictionary<Snowflake, List<Warning>> _warnings;
     private readonly Dictionary<Snowflake, List<Caselog>> _caselogs;
@@ -20,6 +20,26 @@ public class MockGaiusAPIService : IGaiusAPIService
     public void Dispose()
     {
         // do nothing
+    }
+
+    public Task<IEnumerable<Warning>> GetAllWarnings()
+    {
+        return Task.FromResult<IEnumerable<Warning>>(_warnings.Values.SelectMany(list => list).ToList());
+    }
+
+    public Task<IEnumerable<Caselog>> GetAllCaselogs()
+    {
+        return Task.FromResult<IEnumerable<Caselog>>(_caselogs.Values.SelectMany(list => list).ToList());
+    }
+
+    public Task<IEnumerable<Warning>> GetWarningsAfter(DateTime dt)
+    {
+        return Task.FromResult<IEnumerable<Warning>>(from list in _warnings.Values from item in list where item.WarnDate > dt select item);
+    }
+
+    public Task<IEnumerable<Caselog>> GetCaselogsAfter(DateTime dt)
+    {
+        return Task.FromResult<IEnumerable<Caselog>>(from list in _caselogs.Values from item in list where item.Date > dt select item);
     }
 
     public Task<IEnumerable<Warning>?> GetWarnings(Snowflake userId)

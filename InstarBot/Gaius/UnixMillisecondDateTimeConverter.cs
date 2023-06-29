@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 namespace PaxAndromeda.Instar.Gaius;
 
 [SuppressMessage("ReSharper", "SwitchStatementHandlesSomeKnownEnumValuesWithDefault")]
-public class UnixMillisecondDateTimeConverter : DateTimeConverterBase
+public sealed class UnixMillisecondDateTimeConverter : DateTimeConverterBase
 {
     private static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     

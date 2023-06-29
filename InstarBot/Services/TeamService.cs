@@ -9,7 +9,7 @@ namespace PaxAndromeda.Instar.Services;
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
-public class TeamService
+public sealed class TeamService
 {
     private readonly Dictionary<string, Team> _teams;
     private readonly Dictionary<Snowflake, string> _teamIdRefMap;

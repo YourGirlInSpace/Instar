@@ -12,7 +12,7 @@ using Serilog.Events;
 namespace PaxAndromeda.Instar.Services;
 
 [ExcludeFromCodeCoverage]
-public class DiscordService : IDiscordService
+public sealed class DiscordService : IDiscordService
 {
     private readonly string _botToken;
 
@@ -21,7 +21,27 @@ public class DiscordService : IDiscordService
     private readonly InteractionService _interactionService;
     private readonly IServiceProvider _provider;
     private readonly DiscordSocketClient _socketClient;
-    private TaskCompletionSource<SocketGuild>? _guildDownloadCompletionSource;
+    private readonly AsyncEvent<IGuildUser> _userJoinedEvent = new();
+    private readonly AsyncEvent<IMessage> _messageReceivedEvent = new();
+    private readonly AsyncEvent<Snowflake> _messageDeletedEvent = new();
+
+    public event Func<IGuildUser, Task> UserJoined
+    {
+        add => _userJoinedEvent.Add(value);
+        remove => _userJoinedEvent.Remove(value);
+    }
+
+    public event Func<IMessage, Task> MessageReceived
+    {
+        add => _messageReceivedEvent.Add(value);
+        remove => _messageReceivedEvent.Remove(value);
+    }
+
+    public event Func<Snowflake, Task> MessageDeleted
+    {
+        add => _messageDeletedEvent.Add(value);
+        remove => _messageDeletedEvent.Remove(value);
+    }
 
     public DiscordService(IServiceProvider provider, IConfiguration config)
     {
@@ -31,7 +51,7 @@ public class DiscordService : IDiscordService
         {
             // All privileges except for GuildScheduledEvents and GuildInvites.
             // This is written to prevent warnings about these two privileges.
-            GatewayIntents = GatewayIntents.AllUnprivileged
+            GatewayIntents = GatewayIntents.GuildMembers | GatewayIntents.GuildMessages | GatewayIntents.AllUnprivileged
                              & ~(GatewayIntents.GuildScheduledEvents | GatewayIntents.GuildInvites),
             LogLevel = LogSeverity.Debug
         });
@@ -45,7 +65,9 @@ public class DiscordService : IDiscordService
         _socketClient.Log += HandleDiscordLog;
         _socketClient.InteractionCreated += HandleInteraction;
         _socketClient.MessageCommandExecuted += HandleMessageCommand;
-        _socketClient.GuildMembersDownloaded += SocketClientOnGuildMembersDownloaded;
+        _socketClient.MessageReceived += async message => await _messageReceivedEvent.Invoke(message);
+        _socketClient.MessageDeleted += async (msgCache, _) => await _messageDeletedEvent.Invoke(msgCache.Id);
+        _socketClient.UserJoined += async user => await _userJoinedEvent.Invoke(user);
         _interactionService.Log += HandleDiscordLog;
 
         _contextCommands = provider.GetServices<IContextCommand>().ToDictionary(n => n.Name, n => n);
@@ -58,12 +80,6 @@ public class DiscordService : IDiscordService
             throw new ConfigurationException("TargetGuild is not set");
         if (string.IsNullOrEmpty(_botToken))
             throw new ConfigurationException("Token is not set");
-    }
-
-    private Task SocketClientOnGuildMembersDownloaded(SocketGuild arg)
-    {
-        _guildDownloadCompletionSource?.TrySetResult(arg);
-        return Task.CompletedTask;
     }
 
     private async Task HandleMessageCommand(SocketMessageCommand arg)
@@ -165,18 +181,77 @@ public class DiscordService : IDiscordService
 
     public async Task<IEnumerable<IGuildUser>> GetAllUsers()
     {
-        var guild = _socketClient.GetGuild(_guild);
-        _guildDownloadCompletionSource = new TaskCompletionSource<SocketGuild>();
-        await _socketClient.DownloadUsersAsync(new []{ guild });
+        try
+        {
+            var guild = _socketClient.GetGuild(_guild);
+            await _socketClient.DownloadUsersAsync(new[] { guild });
 
-        await _guildDownloadCompletionSource.Task;
-        var result = _guildDownloadCompletionSource.Task.Result;
+            return guild.Users;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to download users for guild {GuildID}", _guild);
+            return Array.Empty<IGuildUser>();
+        }
+    }
+    
+    public async IAsyncEnumerable<IMessage> GetMessages(IInstarGuild guild, DateTime afterTime)
+    {
+        Log.Debug("GetMessages({Guild}, {AfterTime})", guild.Id, afterTime);
+        
+        foreach (var channel in guild.TextChannels)
+        {
+            Log.Debug("Downloading #{Channel}", channel.Name);
+            // Reference message will be the "current"
+            // message we are looking at.  Since the
+            // GetMessagesAsync() method returns messages
+            // in order of newest to oldest, we can keep
+            // a running log of the oldest message we've
+            // encountered.
+            var refMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
+            if (refMessage is null)
+                continue;
+            if (refMessage.Timestamp < afterTime)
+                continue;
+            
+            yield return refMessage;
 
-        return result.Users;
+            var totalMessages = 1;
+            var done = false;
+
+            do
+            {
+                await foreach (var messageList in channel.GetMessagesAsync(refMessage, Direction.Before))
+                {
+                    if (messageList.Count == 0)
+                    {
+                        done = true;
+                        break;
+                    }
+
+                    foreach (var message in messageList)
+                    {
+                        totalMessages++;
+                        refMessage = message;
+
+                        if (message.Timestamp < afterTime)
+                        {
+                            done = true;
+                            break;
+                        }
+
+                        yield return refMessage;
+                    }
+
+                    if (done)
+                        break;
+                }
+            } while (!done);
+
+            Log.Verbose("Cached {TotalMessages} messages from #{ChannelName}", totalMessages, channel.Name);
+        }
     }
 
     public async Task<IChannel> GetChannel(Snowflake channelId)
-    {
-        return await _socketClient.GetChannelAsync(channelId);
-    }
+        => await _socketClient.GetChannelAsync(channelId);
 }

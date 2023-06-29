@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
+using InstarBot.Tests.Services;
 using Microsoft.Extensions.DependencyInjection;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.Commands;
@@ -46,7 +47,7 @@ public class BirthdayCommandStepDefinitions
         var userId = new Snowflake().ID;
 
         var ddbService = TestUtilities.GetServices().GetService<IInstarDDBService>();
-        var cmd = TestUtilities.SetupCommandMock(() => new SetBirthdayCommand(ddbService!), new TestContext
+        var cmd = TestUtilities.SetupCommandMock(() => new SetBirthdayCommand(ddbService!, new MockMetricService()), new TestContext
         {
             UserID = userId
         });

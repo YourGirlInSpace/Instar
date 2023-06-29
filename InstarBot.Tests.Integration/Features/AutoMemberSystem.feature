@@ -23,6 +23,8 @@ Feature: Auto Member System
 			* Posted an introduction
 			* Posted 100 messages in the past day
 			* Not been punished
+			* Joined the server for the first time
+			* Not been granted membership before
 			When the Auto Member System processes
 			Then the user should be granted membership
 			
@@ -34,6 +36,8 @@ Feature: Auto Member System
 			* Posted an introduction
 			* Posted 100 messages in the past day
 			* Not been punished
+			* Joined the server for the first time
+			* Not been granted membership before
 			When the Auto Member System processes
 			Then the user should not be granted membership
 	
@@ -45,6 +49,8 @@ Feature: Auto Member System
 			* Posted an introduction
 			* Posted 100 messages in the past day
 			* Not been punished
+			* Joined the server for the first time
+			* Not been granted membership before
 			When the Auto Member System processes
 			Then the user should not be granted membership
 			
@@ -66,6 +72,8 @@ Feature: Auto Member System
 			* Posted an introduction
 			* Posted 100 messages in the past day
 			* Not been punished
+			* Joined the server for the first time
+			* Not been granted membership before
 			When the Auto Member System processes
 			Then the user should remain unchanged
 		
@@ -78,6 +86,8 @@ Feature: Auto Member System
 			* Did not post an introduction
 			* Posted 100 messages in the past day
 			* Not been punished
+			* Joined the server for the first time
+			* Not been granted membership before
 			When the Auto Member System processes
 			Then the user should not be granted membership
 			
@@ -119,6 +129,8 @@ Feature: Auto Member System
 			* Posted an introduction
 			* Posted 100 messages in the past day
 			* Been issued a warning
+			* Joined the server for the first time
+			* Not been granted membership before
 			When the Auto Member System processes
 			Then the user should not be granted membership
 			
@@ -131,37 +143,17 @@ Feature: Auto Member System
 			* Been issued a mute
 			When the Auto Member System processes
 			Then the user should not be granted membership
-	
-	Rule: No membership should be granted while Gaius API is unavailable
-		Scenario: A user eligible for membership should not be granted membership when Gaius API is unavailable
+			
+	Rule: Users who have been granted membership and left should be granted membership upon rejoining
+			
+		Scenario: A user who has had membership before should be automatically granted membership
 			Given a user that has:
-			* Joined 36 hours ago
+			* Joined 1 hours ago
+			* Been granted membership before
+			* First joined 240 hours ago 
 			* The roles New Member, Transfemme, 21+ and She/Her
 			* Posted an introduction
-			* Posted 100 messages in the past day
+			* Posted 2 messages in the past day
 			* Not been punished
-			But the Gaius API is not available
-			When the Auto Member System processes
-			Then the user should not be granted membership
-			
-		Scenario: A user with a warning should not be granted membership when Gaius API is unavailable
-			Given a user that has:
-			* Joined 36 hours ago
-			* The roles New Member, Transfemme, 21+ and She/Her
-			* Posted an introduction
-			* Posted 100 messages in the past day
-			* Been issued a warning
-			But the Gaius API is not available
-			When the Auto Member System processes
-			Then the user should not be granted membership
-			
-		Scenario: A user with a caselog should not be granted membership when Gaius API is unavailable
-			Given a user that has:
-			* Joined 36 hours ago
-			* The roles New Member, Transfemme, 21+ and She/Her
-			* Posted an introduction
-			* Posted 100 messages in the past day
-			* Been issued a mute
-			But the Gaius API is not available
-			When the Auto Member System processes
-			Then the user should not be granted membership
+			When the user joins the server
+			Then the user should be granted membership

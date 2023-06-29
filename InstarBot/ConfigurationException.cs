@@ -3,7 +3,7 @@
 namespace PaxAndromeda.Instar;
 
 [ExcludeFromCodeCoverage]
-public class ConfigurationException : Exception
+public sealed class ConfigurationException : Exception
 {
     public ConfigurationException(string message) : base(message)
     {

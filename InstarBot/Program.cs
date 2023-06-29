@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Amazon;
+using Amazon.CloudWatchLogs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
@@ -7,6 +9,8 @@ using PaxAndromeda.Instar.Commands;
 using PaxAndromeda.Instar.Services;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Json;
+using Serilog.Sinks.AwsCloudWatch;
 
 namespace PaxAndromeda.Instar;
 
@@ -18,7 +22,6 @@ internal static class Program
 
     public static async Task Main()
     {
-        InitializeLogger();
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
         #if DEBUG
@@ -34,7 +37,9 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            Log.Fatal(ex, "Malformed configuration!  Aborting!");
+            // At this point, the logger is not yet created
+            Console.WriteLine("FATAL:  Malformed configuration!  Aborting!");
+            Console.WriteLine(ex.ToString());
             return;
         }
 
@@ -42,11 +47,14 @@ internal static class Program
             .AddJsonFile(configPath)
             .Build();
         
+        InitializeLogger(config);
+        
         Console.CancelKeyPress += StopSystem;
         await RunAsync(config);
 
         while (!_cts.IsCancellationRequested) await Task.Delay(100);
     }
+
     private static async void StopSystem(object? sender, ConsoleCancelEventArgs e)
     {
         await _services.GetRequiredService<DiscordService>().Stop();
@@ -64,31 +72,47 @@ internal static class Program
         jObject.Validate(schema);
     }
 
-
     private static async Task RunAsync(IConfiguration config)
     {
         _cts = new CancellationTokenSource();
         _services = ConfigureServices(config);
 
-        var discordService = _services.GetRequiredService<DiscordService>();
+        var discordService = _services.GetRequiredService<IDiscordService>();
         await discordService.Start(_services);
     }
 
-    private static void InitializeLogger()
+    private static void InitializeLogger(IConfiguration config)
     {
 #if TRACE
-        const LogEventLevel minLevel = LogEventLevel.Debug;
+        const LogEventLevel minLevel = LogEventLevel.Verbose;
 #elif DEBUG
-            const LogEventLevel minLevel = LogEventLevel.Verbose;
+        const LogEventLevel minLevel = LogEventLevel.Verbose;
 #else
-            const LogEventLevel minLevel = LogEventLevel.Information;
+        const LogEventLevel minLevel = LogEventLevel.Information;
 #endif
-
-        Log.Logger = new LoggerConfiguration()
+        
+        var logCfg = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.Is(minLevel)
-            .WriteTo.Console()
-            .CreateLogger();
+            .WriteTo.Console();
+
+        var awsSection = config.GetSection("AWS");
+        var cwSection = awsSection.GetSection("CloudWatch");
+        if (cwSection.GetValue<bool>("Enabled"))
+        {
+            var region = awsSection.GetValue<string>("Region");
+
+            var cwClient = new AmazonCloudWatchLogsClient(new AWSIAMCredential(config), RegionEndpoint.GetBySystemName(region));
+            
+            logCfg = logCfg.WriteTo.AmazonCloudWatch(new CloudWatchSinkOptions
+            {
+                LogGroupName = cwSection.GetValue<string>("LogGroup"),
+                TextFormatter = new JsonFormatter(renderMessage: true),
+                MinimumLogEventLevel = LogEventLevel.Information
+            }, cwClient);
+        }
+
+        Log.Logger = logCfg.CreateLogger();
     }
 
     private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
@@ -106,8 +130,10 @@ internal static class Program
         // Services
         services.AddSingleton<TeamService>();
         services.AddTransient<IInstarDDBService, InstarDDBService>();
+        services.AddTransient<IMetricService, CloudwatchMetricService>();
         services.AddTransient<IGaiusAPIService, GaiusAPIService>();
-        services.AddSingleton<DiscordService>();
+        services.AddSingleton<IDiscordService, DiscordService>();
+        services.AddSingleton<AutoMemberSystem>();
         
         // Commands & Interactions
         services.AddTransient<PingCommand>();

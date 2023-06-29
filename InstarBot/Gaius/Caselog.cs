@@ -8,7 +8,7 @@ public record Caselog
 {
     [UsedImplicitly] public Snowflake UserID { get; set; } = default!;
     [UsedImplicitly] public CaselogType Type { get; set; }
-    [UsedImplicitly] public TimeSpan? Time { get; set; }
+    [UsedImplicitly] public string Time { get; set; } = null!;
     [UsedImplicitly] public Snowflake ModID { get; set; } = default!;
     [UsedImplicitly] public string Reason { get; set; } = default!;
 

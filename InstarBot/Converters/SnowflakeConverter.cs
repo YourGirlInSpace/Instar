@@ -7,7 +7,7 @@ namespace PaxAndromeda.Instar.Converters;
 /// <summary>
 /// Provides convert methods for snowflakes in configuration
 /// </summary>
-public class SnowflakeConverter : ConfigurationConverterBase
+public sealed class SnowflakeConverter : ConfigurationConverterBase
 {
     public override bool CanConvertFrom(
         ITypeDescriptorContext? ctx, Type type)

@@ -8,7 +8,7 @@ using PaxAndromeda.Instar.Gaius;
 namespace InstarBot.Tests;
 
 [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
-public class TestContext
+public sealed class TestContext
 {
     public ulong UserID { get; init; } = 1420070400100;
     public ulong ChannelID { get; init; } = 1420070400200;

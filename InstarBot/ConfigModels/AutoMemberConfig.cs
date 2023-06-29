@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace PaxAndromeda.Instar.ConfigModels;
 
-public class AutoMemberConfig
+public sealed class AutoMemberConfig
 {
     [SnowflakeType(SnowflakeType.Role)] public Snowflake HoldRole { get; set; } = null!;
     [SnowflakeType(SnowflakeType.Channel)] public Snowflake IntroductionChannel { get; set; } = null!;
@@ -11,6 +11,7 @@ public class AutoMemberConfig
     public int MinimumMessages { get; set; }
     public int MinimumMessageTime { get; set; }
     public List<RoleGroup> RequiredRoles { get; set; } = null!;
+    public bool EnableGaiusCheck { get; set; }
 }
 
 [UsedImplicitly]

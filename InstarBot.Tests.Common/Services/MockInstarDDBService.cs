@@ -4,7 +4,7 @@ using PaxAndromeda.Instar.Services;
 
 namespace InstarBot.Tests.Services;
 
-public class MockInstarDDBService : IInstarDDBService
+public sealed class MockInstarDDBService : IInstarDDBService
 {
     private readonly Dictionary<Snowflake, UserDatabaseInformation> _localData;
 
@@ -29,7 +29,15 @@ public class MockInstarDDBService : IInstarDDBService
     public Task<bool> UpdateUserJoinDate(Snowflake snowflake, DateTime joinDate)
     {
         _localData.TryAdd(snowflake, new UserDatabaseInformation(snowflake));
-        _localData[snowflake].Birthday = joinDate;
+        _localData[snowflake].JoinDate = joinDate;
+
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> UpdateUserMembership(Snowflake snowflake, bool membershipGranted)
+    {
+        _localData.TryAdd(snowflake, new UserDatabaseInformation(snowflake));
+        _localData[snowflake].GrantedMembership = membershipGranted;
 
         return Task.FromResult(true);
     }
@@ -46,5 +54,12 @@ public class MockInstarDDBService : IInstarDDBService
         return !_localData.ContainsKey(snowflake)
             ? Task.FromResult<DateTime?>(null)
             : Task.FromResult<DateTime?>(_localData[snowflake].JoinDate);
+    }
+
+    public Task<bool?> GetUserMembership(Snowflake snowflake)
+    {
+        return !_localData.ContainsKey(snowflake)
+            ? Task.FromResult<bool?>(null)
+            : Task.FromResult<bool?>(_localData[snowflake].GrantedMembership);
     }
 }

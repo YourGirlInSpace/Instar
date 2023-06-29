@@ -11,7 +11,7 @@ using Xunit;
 
 namespace InstarBot.Tests.Preconditions;
 
-public class RequireStaffMemberAttributeTests
+public sealed class RequireStaffMemberAttributeTests
 {
     [Fact]
     public async Task CheckRequirementsAsync_ShouldReturnFalse_WithBadConfig()

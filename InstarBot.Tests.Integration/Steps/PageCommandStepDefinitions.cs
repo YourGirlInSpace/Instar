@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Discord;
 using FluentAssertions;
+using InstarBot.Tests.Services;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
@@ -137,7 +138,7 @@ public sealed class PageCommandStepDefinitions
         var userTeam = _scenarioContext.Get<Snowflake>("UserTeamID");
 
         var commandMock = TestUtilities.SetupCommandMock(
-            () => new PageCommand(TestUtilities.GetTeamService()),
+            () => new PageCommand(TestUtilities.GetTeamService(), new MockMetricService()),
             new TestContext
             {
                 UserRoles = new List<Snowflake> { userTeam }

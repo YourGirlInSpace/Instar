@@ -19,6 +19,7 @@
     "MinimumJoinAge": 86400,
     "MinimumMessages": 30,
     "MinimumMessageTime": 86400,
+    "EnableGaiusCheck": true,
     "RequiredRoles": [
       {
         "GroupName": "Age",

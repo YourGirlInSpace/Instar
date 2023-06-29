@@ -1,4 +1,6 @@
-﻿namespace PaxAndromeda.Instar;
+﻿using System.Reflection;
+
+namespace PaxAndromeda.Instar;
 
 public static class Utilities
 {
@@ -11,5 +13,16 @@ public static class Utilities
 
         var attributes = membersInfo[0].GetCustomAttributes(typeof(T), false);
         return attributes.Length > 0 ? attributes.OfType<T>().ToList() : null;
+    }
+    
+    public static T? GetAttributeOfType<T>(this Enum enumVal) where T : Attribute
+    {
+        var type = enumVal.GetType();
+        var membersInfo = type.GetMember(enumVal.ToString());
+        if (membersInfo.Length == 0)
+            return null;
+
+        var attr = membersInfo[0].GetCustomAttribute(typeof(T), false);
+        return attr as T;
     }
 }

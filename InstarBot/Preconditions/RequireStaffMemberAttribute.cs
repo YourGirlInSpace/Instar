@@ -6,7 +6,7 @@ using Serilog;
 
 namespace PaxAndromeda.Instar.Preconditions;
 
-public class RequireStaffMemberAttribute : PreconditionAttribute
+public sealed class RequireStaffMemberAttribute : PreconditionAttribute
 {
     public override Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context,
         ICommandInfo commandInfo, IServiceProvider services)

@@ -1,3 +1,5 @@
+
+
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
@@ -28,6 +30,20 @@
         },
         "Region": {
           "type": "string"
+        },
+        "CloudWatch": {
+          "type": "object",
+          "properties": {
+            "Enabled": {
+              "type": "boolean"
+            },
+            "LogGroup": {
+              "type": "string"
+            },
+            "MetricNamespace": {
+              "type": "string"
+            }
+          }
         }
       },
       "required": [
@@ -76,6 +92,9 @@
         },
         "MinimumMessageTime": {
           "type": "integer"
+        },
+        "EnableGaiusCheck": {
+          "type": "boolean"
         },
         "RequiredRoles": {
           "type": "array",
@@ -206,6 +225,7 @@
         "MinimumJoinAge",
         "MinimumMessages",
         "MinimumMessageTime",
+        "EnableGaiusCheck",
         "RequiredRoles"
       ]
     },

@@ -4,20 +4,25 @@ using Discord;
 using Discord.Interactions;
 using JetBrains.Annotations;
 using PaxAndromeda.Instar.ConfigModels;
+using PaxAndromeda.Instar.Metrics;
 using PaxAndromeda.Instar.Preconditions;
 using PaxAndromeda.Instar.Services;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Commands;
 
+// Required to be unsealed for mocking
+[SuppressMessage("ReSharper", "ClassCanBeSealed.Global")]
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")] // Required for mocking
 public class PageCommand : BaseCommand
 {
     private readonly TeamService _teamService;
+    private readonly IMetricService _metricService;
 
-    public PageCommand(TeamService teamService)
+    public PageCommand(TeamService teamService, IMetricService metricService)
     {
         _teamService = teamService;
+        _metricService = metricService;
     }
 
     [UsedImplicitly]
@@ -66,6 +71,8 @@ public class PageCommand : BaseCommand
                 mention,
                 embed: BuildEmbed(reason, message, user, channel, userTeam!, Context.User),
                 allowedMentions: AllowedMentions.All);
+
+            await _metricService.Emit(Metric.Paging_SentPages, 1);
         }
         catch (Exception ex)
         {

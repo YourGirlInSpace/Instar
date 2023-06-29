@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 namespace PaxAndromeda.Instar;
 
 [ExcludeFromCodeCoverage]
-public record AWSIAMCredential
+public sealed record AWSIAMCredential
 {
     private string AccessKey { get; }
     private string SecretKey { get; }
