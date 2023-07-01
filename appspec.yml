@@ -1,0 +1,20 @@
+version: 0.0
+os: linux
+files:
+  - source: Commands
+    destination: /Instar/Commands
+  - source: InstarBot/bin/Release/net6.0
+    destination: /Instar/bin
+hooks:
+  ApplicationStop:
+    - location: /Commands/ApplicationStop/StopInstar.sh
+      timeout: 3600
+  AfterInstall:
+    - location: /Commands/AfterInstall/DownloadConfig.sh
+      timeout: 3600
+  ApplicationStart:
+    - location: /Commands/ApplicationStart/StartInstar.sh
+      timeout: 3600
+  ValidateService:
+    - location: /Commands/ValidateService/CheckInstarRunning.sh
+      timeout: 3600
