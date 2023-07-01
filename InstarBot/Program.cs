@@ -26,16 +26,16 @@ internal static class Program
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
         var cli = Parser.Default.ParseArguments<CommandLineOptions>(args).Value;
-        
-        #if DEBUG
+
+#if DEBUG
         var configPath = "Config/Instar.debug.conf.json";
-        #else
+#else
         var configPath = "Config/Instar.conf.json";
-        #endif
+#endif
 
         if (!string.IsNullOrEmpty(cli.ConfigPath))
             configPath = cli.ConfigPath;
-        
+
         // Initial check:  Is the configuration valid?
         try
         {
@@ -69,7 +69,9 @@ internal static class Program
 
     private static void ValidateConfiguration(string configPath)
     {
-        var schemaData = File.ReadAllText(Path.Combine("Config", "Instar.conf.schema.json"));
+        Console.WriteLine("Loading configuration from " + configPath);
+        
+        var schemaData = File.ReadAllText(Path.Combine(Path.GetDirectoryName(configPath) ?? "Config", "Instar.conf.schema.json"));
         var configData = File.ReadAllText(configPath);
         
         var schema = JSchema.Parse(schemaData);
