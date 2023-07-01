@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Amazon;
 using Amazon.CloudWatchLogs;
+using CommandLine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
@@ -20,15 +21,20 @@ internal static class Program
     private static CancellationTokenSource _cts = null!;
     private static IServiceProvider _services = null!;
 
-    public static async Task Main()
+    public static async Task Main(string[] args)
     {
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
 
+        var cli = Parser.Default.ParseArguments<CommandLineOptions>(args).Value;
+        
         #if DEBUG
-        const string configPath = "Config/Instar.debug.conf.json";
+        var configPath = "Config/Instar.debug.conf.json";
         #else
-        const string configPath = "Config/Instar.conf.json";
+        var configPath = "Config/Instar.conf.json";
         #endif
+
+        if (!string.IsNullOrEmpty(cli.ConfigPath))
+            configPath = cli.ConfigPath;
         
         // Initial check:  Is the configuration valid?
         try
