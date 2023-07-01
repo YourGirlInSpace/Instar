@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: InstarBot/Deploy/Commands
+  - source: Commands
     destination: /Instar/Commands
   - source: InstarBot/bin/Release/net6.0
     destination: /Instar/bin
