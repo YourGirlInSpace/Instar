@@ -6,6 +6,9 @@ files:
   - source: InstarBot/bin/Release/net6.0
     destination: /Instar/bin
 hooks:
+  AfterInstall:
+    - location: /Commands/AfterInstall/DownloadConfig.sh
+      timeout: 3600
   ApplicationStart:
     - location: /Commands/ApplicationStart/StartInstar.sh
       timeout: 3600
