@@ -7,14 +7,14 @@ files:
     destination: /Instar/bin
 hooks:
   ApplicationStop:
-    - location: /Instar/Commands/ApplicationStop/StopInstar.sh
+    - location: /Commands/ApplicationStop/StopInstar.sh
       timeout: 3600
   AfterInstall:
-    - location: /Instar/Commands/AfterInstall/DownloadConfig.sh
+    - location: /Commands/AfterInstall/DownloadConfig.sh
       timeout: 3600
   ApplicationStart:
-    - location: /Instar/Commands/ApplicationStart/StartInstar.sh
+    - location: /Commands/ApplicationStart/StartInstar.sh
       timeout: 3600
   ValidateService:
-    - location: /Instar/Commands/ValidateService/CheckInstarRunning.sh
+    - location: /Commands/ValidateService/CheckInstarRunning.sh
       timeout: 3600
