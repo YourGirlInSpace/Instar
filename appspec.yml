@@ -7,5 +7,5 @@ files:
     destination: /Instar/bin
 hooks:
   ApplicationStart:
-    - location: /Instar/Commands/ApplicationStart/StartInstar.sh
+    - location: /Commands/ApplicationStart/StartInstar.sh
       timeout: 3600
