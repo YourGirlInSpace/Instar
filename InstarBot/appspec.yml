@@ -1,0 +1,11 @@
+version: 0.0
+os: linux
+files:
+  - source: InstarBot/Deploy/Commands
+    destination: /Instar/Commands
+  - source: InstarBot/bin/Release/net6.0
+    destination: /Instar/bin
+hooks:
+  ApplicationStart:
+    - location: Deploy/Commands/ApplicationStart/StartInstar.sh
+      timeout: 3600
