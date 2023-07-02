@@ -119,6 +119,11 @@ public sealed class AutoMemberSystem
             Log.Information("User {UserID} has been granted membership before.  Granting membership again", user.Id);
             await GrantMembership(user);
         }
+        else
+        {
+            await user.AddRoleAsync(_newMemberRole);
+        }
+        
         await _metricService.Emit(Metric.Discord_UsersJoined, 1);
     }
 
