@@ -10,6 +10,8 @@ hooks:
     - location: /Commands/ApplicationStop/StopInstar.sh
       timeout: 3600
   AfterInstall:
+    - location: /Commands/AfterInstall/UpdateScriptPermissions.sh
+      timeout: 3600
     - location: /Commands/AfterInstall/DownloadConfig.sh
       timeout: 3600
   ApplicationStart:
