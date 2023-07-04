@@ -3,7 +3,6 @@
   "BotName": "Instar",
   "TargetGuild": 985521318080413766,
   "TargetChannel": 985521318080413769,
-  "Token": "{{DISCORD BOT TOKEN}}",
   "StaffAnnounceChannel": 985521973113286667,
   "StaffRoleID": 793607635608928257,
   "NewMemberRoleID": 796052052433698817,
