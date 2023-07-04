@@ -100,7 +100,7 @@ public class ReportUserCommandStepDefinitions
 
         var commandMock =
             TestUtilities.SetupCommandMock
-            (() => new ReportUserCommand(TestUtilities.GetTestConfiguration(), new MockMetricService()),
+            (() => new ReportUserCommand(TestUtilities.GetDynamicConfiguration(), new MockMetricService()),
                 commandMockContext);
         _context.Add("TextChannelMock", commandMockContext.TextChannelMock);
 

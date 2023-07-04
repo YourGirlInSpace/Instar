@@ -42,18 +42,18 @@ public sealed class MockInstarDDBService : IInstarDDBService
         return Task.FromResult(true);
     }
 
-    public Task<DateTime?> GetUserBirthday(Snowflake snowflake)
+    public Task<DateTimeOffset?> GetUserBirthday(Snowflake snowflake)
     {
         return !_localData.ContainsKey(snowflake)
-            ? Task.FromResult<DateTime?>(null)
-            : Task.FromResult<DateTime?>(_localData[snowflake].Birthday);
+            ? Task.FromResult<DateTimeOffset?>(null)
+            : Task.FromResult<DateTimeOffset?>(_localData[snowflake].Birthday);
     }
 
-    public Task<DateTime?> GetUserJoinDate(Snowflake snowflake)
+    public Task<DateTimeOffset?> GetUserJoinDate(Snowflake snowflake)
     {
         return !_localData.ContainsKey(snowflake)
-            ? Task.FromResult<DateTime?>(null)
-            : Task.FromResult<DateTime?>(_localData[snowflake].JoinDate);
+            ? Task.FromResult<DateTimeOffset?>(null)
+            : Task.FromResult<DateTimeOffset?>(_localData[snowflake].JoinDate);
     }
 
     public Task<bool?> GetUserMembership(Snowflake snowflake)

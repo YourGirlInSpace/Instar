@@ -2,7 +2,6 @@ using Discord;
 using FluentAssertions;
 using InstarBot.Tests.Models;
 using InstarBot.Tests.Services;
-using Microsoft.Extensions.Configuration;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.ConfigModels;
 using PaxAndromeda.Instar.Gaius;
@@ -35,7 +34,7 @@ public class AutoMemberSystemStepDefinitions
         var context = _scenarioContext.Get<TestContext>("Context");
         var discordService = TestUtilities.SetupDiscordService(context);
         var gaiusApiService = TestUtilities.SetupGaiusAPIService(context);
-        var config = TestUtilities.GetTestConfiguration();
+        var config = TestUtilities.GetDynamicConfiguration();
         _scenarioContext.Add("Config", config);
         _scenarioContext.Add("DiscordService", discordService);
         
@@ -140,10 +139,10 @@ public class AutoMemberSystemStepDefinitions
     }
 
     [Given("a user that has:")]
-    public void GivenAUserThatHas()
+    public async Task GivenAUserThatHas()
     {
-        var config = TestUtilities.GetTestConfiguration();
-        var amsConfig = config.GetSection("AutoMemberConfig").Get<AutoMemberConfig>()!;
+        var config = await TestUtilities.GetDynamicConfiguration().GetConfig();
+        var amsConfig = config.AutoMemberConfig;
         _scenarioContext.Add("AMSConfig", amsConfig);
         
         var cmc = new TestContext();
@@ -177,27 +176,31 @@ public class AutoMemberSystemStepDefinitions
     public void GivenPostedMessagesInThePastDay(int numMessages) => _scenarioContext.Add("UserMessagesPast24Hours", numMessages);
 
     [Then("the user should be granted membership")]
-    public void ThenTheUserShouldBeGrantedMembership()
+    public async Task ThenTheUserShouldBeGrantedMembership()
     {
         var userId = _scenarioContext.Get<Snowflake>("UserID");
         var context = _scenarioContext.Get<TestContext>("Context");
-        var config = _scenarioContext.Get<IConfiguration>("Config");
+        var config = _scenarioContext.Get<IDynamicConfigService>("Config");
         var user = context.GuildUsers.First(n => n.Id == userId.ID);
 
-        user.RoleIds.Should().Contain(config.GetValue<ulong>("MemberRoleID"));
-        user.RoleIds.Should().NotContain(config.GetValue<ulong>("NewMemberRoleID"));
+        var cfg = await config.GetConfig();
+
+        user.RoleIds.Should().Contain(cfg.MemberRoleID);
+        user.RoleIds.Should().NotContain(cfg.NewMemberRoleID);
     }
 
     [Then("the user should not be granted membership")]
-    public void ThenTheUserShouldNotBeGrantedMembership()
+    public async Task ThenTheUserShouldNotBeGrantedMembership()
     {
         var userId = _scenarioContext.Get<Snowflake>("UserID");
         var context = _scenarioContext.Get<TestContext>("Context");
-        var config = _scenarioContext.Get<IConfiguration>("Config");
+        var config = _scenarioContext.Get<IDynamicConfigService>("Config");
         var user = context.GuildUsers.First(n => n.Id == userId.ID);
 
-        user.RoleIds.Should().Contain(config.GetValue<ulong>("NewMemberRoleID"));
-        user.RoleIds.Should().NotContain(config.GetValue<ulong>("MemberRoleID"));
+        var cfg = await config.GetConfig();
+        
+        user.RoleIds.Should().Contain(cfg.NewMemberRoleID);
+        user.RoleIds.Should().NotContain(cfg.MemberRoleID);
     }
 
     [Given("Not been punished")]

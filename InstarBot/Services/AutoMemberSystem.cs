@@ -3,7 +3,6 @@ using System.Runtime.Caching;
 using System.Timers;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using PaxAndromeda.Instar.Caching;
 using PaxAndromeda.Instar.ConfigModels;
 using PaxAndromeda.Instar.Metrics;
@@ -19,12 +18,9 @@ public sealed class AutoMemberSystem
     private readonly ConcurrentDictionary<ulong, bool> _introductionPosters = new();
     private readonly ConcurrentDictionary<ulong, bool> _punishedUsers = new();
     
-    [SnowflakeType(SnowflakeType.Role)] private readonly Snowflake _newMemberRole;
-    [SnowflakeType(SnowflakeType.Role)] private readonly Snowflake _memberRole;
-    [SnowflakeType(SnowflakeType.Role)] private readonly Snowflake _holdRole;
-    private readonly AutoMemberConfig _amsConfig;
     private DateTime _earliestJoinTime;
-    
+
+    private readonly IDynamicConfigService _dynamicConfig;
     private readonly IDiscordService _discord;
     private readonly IGaiusAPIService _gaiusApiService;
     private readonly IInstarDDBService _ddbService;
@@ -36,29 +32,34 @@ public sealed class AutoMemberSystem
     /// </summary>
     private Dictionary<ulong, int>? _recentMessages;
 
-    public AutoMemberSystem(IConfiguration config, IDiscordService discord, IGaiusAPIService gaiusApiService,
+    public AutoMemberSystem(IDynamicConfigService dynamicConfig, IDiscordService discord, IGaiusAPIService gaiusApiService,
         IInstarDDBService ddbService, IMetricService metricService)
     {
-        _newMemberRole = config.GetValue<ulong>("NewMemberRoleID");
-        _memberRole = config.GetValue<ulong>("MemberRoleID");
-        _amsConfig = config.GetSection("AutoMemberConfig").Get<AutoMemberConfig>()!;
-        _holdRole = _amsConfig.HoldRole;
-
+        _dynamicConfig = dynamicConfig;
         _discord = discord;
         _gaiusApiService = gaiusApiService;
         _ddbService = ddbService;
         _metricService = metricService;
-        _earliestJoinTime = DateTime.UtcNow - TimeSpan.FromSeconds(_amsConfig.MinimumJoinAge);
 
         discord.UserJoined += HandleUserJoined;
         discord.MessageReceived += HandleMessageReceived;
         discord.MessageDeleted += HandleMessageDeleted;
 
-        // Preload our message cache
-        Task.Run(PreloadMessageCache).Wait();
-        Task.Run(PreloadIntroductionPosters).Wait();
-        if (_amsConfig.EnableGaiusCheck)
-            Task.Run(PreloadGaiusPunishments).Wait();
+        Task.Run(Initialize).Wait();
+    }
+
+    private async Task Initialize()
+    {
+        var cfg = await _dynamicConfig.GetConfig();
+        
+        _earliestJoinTime = DateTime.UtcNow - TimeSpan.FromSeconds(cfg.AutoMemberConfig.MinimumJoinAge);
+        
+        await PreloadMessageCache(cfg);
+        await PreloadIntroductionPosters(cfg);
+
+        if (cfg.AutoMemberConfig.EnableGaiusCheck)
+            await PreloadGaiusPunishments();
+
         StartTimer();
     }
 
@@ -89,6 +90,8 @@ public sealed class AutoMemberSystem
 
     private async Task HandleMessageReceived(IMessage arg)
     {
+        var cfg = await _dynamicConfig.GetConfig();
+        
         ulong guildId = 0;
         if (arg.Author is SocketGuildUser guildUser)
             guildId = guildUser.Guild.Id;
@@ -96,17 +99,17 @@ public sealed class AutoMemberSystem
         var mp = new MessageProperties(arg.Author.Id, arg.Channel.Id, guildId);
         _messageCache.Add(arg.Id.ToString(), mp, new CacheItemPolicy
         {
-            AbsoluteExpiration = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(_amsConfig.MinimumMessageTime)
+            AbsoluteExpiration = DateTimeOffset.UtcNow + TimeSpan.FromSeconds(cfg.AutoMemberConfig.MinimumMessageTime)
         });
 
         await _metricService.Emit(Metric.Discord_MessagesSent, 1);
         await _metricService.Emit(Metric.AMS_CachedMessages, _messageCache.GetCount());
 
-        if (!arg.Channel.Id.Equals(_amsConfig.IntroductionChannel.ID)) 
+        if (!arg.Channel.Id.Equals(cfg.AutoMemberConfig.IntroductionChannel.ID)) 
             return;
         
         // Ignore members
-        if (arg.Author is IGuildUser sgUser && sgUser.RoleIds.Contains(_memberRole.ID))
+        if (arg.Author is IGuildUser sgUser && sgUser.RoleIds.Contains(cfg.MemberRoleID.ID))
             return;
             
         _introductionPosters.TryAdd(arg.Author.Id, true);
@@ -114,14 +117,16 @@ public sealed class AutoMemberSystem
 
     private async Task HandleUserJoined(IGuildUser user)
     {
+        var cfg = await _dynamicConfig.GetConfig();
+        
         if (await WasUserGrantedMembershipBefore(user.Id))
         {
             Log.Information("User {UserID} has been granted membership before.  Granting membership again", user.Id);
-            await GrantMembership(user);
+            await GrantMembership(cfg, user);
         }
         else
         {
-            await user.AddRoleAsync(_newMemberRole);
+            await user.AddRoleAsync(cfg.NewMemberRoleID);
         }
         
         await _metricService.Emit(Metric.Discord_UsersJoined, 1);
@@ -156,17 +161,18 @@ public sealed class AutoMemberSystem
         try
         {
             await _metricService.Emit(Metric.AMS_Runs, 1);
+            var cfg = await _dynamicConfig.GetConfig();
             
             // Caution:  This is an extremely long running method!
             Log.Information("Beginning auto member routine");
 
-            if (_amsConfig.EnableGaiusCheck)
+            if (cfg.AutoMemberConfig.EnableGaiusCheck)
             {
                 Log.Information("Updating Gaius database");
                 await UpdateGaiusPunishments();
             }
 
-            _earliestJoinTime = DateTime.UtcNow - TimeSpan.FromSeconds(_amsConfig.MinimumJoinAge);
+            _earliestJoinTime = DateTime.UtcNow - TimeSpan.FromSeconds(cfg.AutoMemberConfig.MinimumJoinAge);
             _recentMessages = GetMessagesSent();
             
             Log.Verbose("Earliest join time: {EarliestJoinTime}", _earliestJoinTime);
@@ -175,15 +181,15 @@ public sealed class AutoMemberSystem
             
             // Filter for new members that joined more than 1 day ago and have the correct roles
             var newMembers = users
-                .Where(user => user.RoleIds.Contains(_newMemberRole)).ToList();
+                .Where(user => user.RoleIds.Contains(cfg.NewMemberRoleID.ID)).ToList();
             
             await _metricService.Emit(Metric.AMS_NewMembers, newMembers.Count);
             Log.Verbose("There are {NumNewMembers} users with the New Member role", newMembers.Count);
 
             var membershipGrants = 0;
 
-            newMembers = newMembers
-                .Where(user => CheckEligibility(user) == MembershipEligibility.Eligible).ToList();
+            newMembers = await newMembers.ToAsyncEnumerable()
+                .WhereAwait(async user => await CheckEligibility(user) == MembershipEligibility.Eligible).ToListAsync();
             
             Log.Verbose("There are {NumNewMembers} users eligible for membership", newMembers.Count);
                 
@@ -192,7 +198,7 @@ public sealed class AutoMemberSystem
                 // User has all of the qualifications, let's update their role
                 try
                 {
-                    await GrantMembership(user);
+                    await GrantMembership(cfg, user);
                     membershipGrants++;
                     
                     Log.Information("Granted {UserId} membership", user.Id);
@@ -229,10 +235,10 @@ public sealed class AutoMemberSystem
         return grantedMembership.Value;
     }
 
-    private async Task GrantMembership(IGuildUser user)
+    private async Task GrantMembership(InstarDynamicConfiguration cfg, IGuildUser user)
     {
-        await user.AddRoleAsync(_memberRole);
-        await user.RemoveRoleAsync(_newMemberRole);
+        await user.AddRoleAsync(cfg.MemberRoleID);
+        await user.RemoveRoleAsync(cfg.NewMemberRoleID);
         await _ddbService.UpdateUserMembership(user.Id, true);
 
         // Remove the cache entry
@@ -243,8 +249,10 @@ public sealed class AutoMemberSystem
         _introductionPosters.TryRemove(user.Id, out _);
     }
 
-    public MembershipEligibility CheckEligibility(IGuildUser user)
+    public async Task<MembershipEligibility> CheckEligibility(IGuildUser user)
     {
+        var cfg = await _dynamicConfig.GetConfig();
+        
         // We need recent messages here, so load it into
         // context if it does not exist, such as when the
         // bot first starts and has not run AMS yet.
@@ -252,19 +260,19 @@ public sealed class AutoMemberSystem
 
         var eligibility = MembershipEligibility.Eligible;
 
-        if (user.RoleIds.Contains(_memberRole.ID))
+        if (user.RoleIds.Contains(cfg.MemberRoleID.ID))
             eligibility |= MembershipEligibility.AlreadyMember;
 
         if (user.JoinedAt > _earliestJoinTime)
             eligibility |= MembershipEligibility.TooYoung;
 
-        if (!CheckUserRequiredRoles(user))
+        if (!CheckUserRequiredRoles(cfg, user))
             eligibility |= MembershipEligibility.MissingRoles;
 
         if (!_introductionPosters.ContainsKey(user.Id))
             eligibility |=  MembershipEligibility.MissingIntroduction;
 
-        if (!_recentMessages.ContainsKey(user.Id) || _recentMessages[user.Id] < _amsConfig.MinimumMessages)
+        if (!_recentMessages.ContainsKey(user.Id) || _recentMessages[user.Id] < cfg.AutoMemberConfig.MinimumMessages)
             eligibility |=  MembershipEligibility.NotEnoughMessages;
 
         if (_punishedUsers.ContainsKey(user.Id))
@@ -277,13 +285,13 @@ public sealed class AutoMemberSystem
         return eligibility;
     }
 
-    private bool CheckUserRequiredRoles(IGuildUser user)
+    private static bool CheckUserRequiredRoles(InstarDynamicConfiguration cfg, IGuildUser user)
     {
         // Auto Member Hold overrides all role permissions
-        if (user.RoleIds.Contains(_holdRole))
+        if (user.RoleIds.Contains(cfg.AutoMemberConfig.HoldRole.ID))
             return false;
         
-        return _amsConfig.RequiredRoles.All(
+        return cfg.AutoMemberConfig.RequiredRoles.All(
             roleGroup => roleGroup.Roles.Select(n => n.ID)
                 .Intersect(user.RoleIds).Any()
             );
@@ -312,11 +320,11 @@ public sealed class AutoMemberSystem
             _punishedUsers.TryAdd(caselog.UserID.ID, true);
     }
 
-    private async Task PreloadMessageCache()
+    private async Task PreloadMessageCache(InstarDynamicConfiguration cfg)
     {
         Log.Information("Preloading message cache...");
         var guild = _discord.GetGuild();
-        var earliestMessageTime = DateTime.UtcNow - TimeSpan.FromSeconds(_amsConfig.MinimumMessageTime);
+        var earliestMessageTime = DateTime.UtcNow - TimeSpan.FromSeconds(cfg.AutoMemberConfig.MinimumMessageTime);
         var messages = _discord.GetMessages(guild, earliestMessageTime);
 
         await foreach (var message in messages)
@@ -324,15 +332,15 @@ public sealed class AutoMemberSystem
             var mp = new MessageProperties(message.Author.Id, message.Channel?.Id ?? 0, guild.Id);
             _messageCache.Add(message.Id.ToString(), mp, new CacheItemPolicy
             {
-                AbsoluteExpiration = message.Timestamp + TimeSpan.FromSeconds(_amsConfig.MinimumMessageTime)
+                AbsoluteExpiration = message.Timestamp + TimeSpan.FromSeconds(cfg.AutoMemberConfig.MinimumMessageTime)
             });
         }
         Log.Information("Done preloading message cache!");
     }
 
-    private async Task PreloadIntroductionPosters()
+    private async Task PreloadIntroductionPosters(InstarDynamicConfiguration cfg)
     {
-        if (await _discord.GetChannel(_amsConfig.IntroductionChannel) is not ITextChannel introChannel)
+        if (await _discord.GetChannel(cfg.AutoMemberConfig.IntroductionChannel) is not ITextChannel introChannel)
             throw new InvalidOperationException("Introductions channel not found");
         
         var messages = (await introChannel.GetMessagesAsync().FlattenAsync()).ToList();
@@ -343,7 +351,7 @@ public sealed class AutoMemberSystem
             var oldestMessage = messages[0];
             foreach (var message in messages)
             {
-                if (message.Author is IGuildUser sgUser && sgUser.RoleIds.Contains(_memberRole.ID))
+                if (message.Author is IGuildUser sgUser && sgUser.RoleIds.Contains(cfg.MemberRoleID.ID))
                     continue;
                 
                 _introductionPosters.TryAdd(message.Author.Id, true);
