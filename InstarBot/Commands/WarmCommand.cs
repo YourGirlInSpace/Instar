@@ -12,10 +12,10 @@ public class WarmCommand : RandomPhraseCommand
         : base(config, "Warm")
     { }
     
-    [SlashCommand("warm", "Description")]
+    [SlashCommand("warm", "With this fun command you can warm someone up!")]
     public override async Task DoCommand([Summary("user", "The user you want to warm.")] IUser? user)
     {
-        if (user == null)
+        if (user is null)
         {
             await RespondAsync(GetRandomNoMentionPhrase());
         }

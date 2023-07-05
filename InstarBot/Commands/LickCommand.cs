@@ -12,10 +12,10 @@ public class LickCommand : RandomPhraseCommand
         : base(config, "Lick")
     { }
     
-    [SlashCommand("lick", "Description")]
+    [SlashCommand("lick", "With this fun command you can lick someone?!")]
     public override async Task DoCommand([Summary("user", "The user you want to lick.")] IUser? user)
     {
-        if (user == null)
+        if (user is null)
         {
             await RespondAsync(GetRandomNoMentionPhrase());
         }

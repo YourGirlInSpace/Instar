@@ -12,10 +12,10 @@ public class BamCommand : RandomPhraseCommand
         : base(config, "Bam")
     { }
     
-    [SlashCommand("bam", "Description")]
+    [SlashCommand("bam", "With this fun command you can bam someone on the head with the biggest hammer!")]
     public override async Task DoCommand([Summary("user", "The user you want to bam.")] IUser? user)
     {
-        if (user == null)
+        if (user is null)
         {
             await RespondAsync(GetRandomNoMentionPhrase());
         }
