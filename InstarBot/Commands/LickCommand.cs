@@ -6,14 +6,14 @@ using Microsoft.Extensions.Configuration;
 namespace PaxAndromeda.Instar.Commands;
 
 [UsedImplicitly]
-public class BamCommand : RandomPhraseCommand
+public class LickCommand : RandomPhraseCommand
 {
-    public BamCommand(IConfiguration config)
-        : base(config, "Bam")
+    public LickCommand(IConfiguration config)
+        : base(config, "Lick")
     { }
     
-    [SlashCommand("bam", "Description")]
-    public override async Task DoCommand([Summary("user", "The user you want to bam.")] IUser? user)
+    [SlashCommand("lick", "Description")]
+    public override async Task DoCommand([Summary("user", "The user you want to lick.")] IUser? user)
     {
         if (user == null)
         {

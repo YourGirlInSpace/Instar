@@ -1,409 +1,438 @@
-
-
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "type": "object",
-  "properties": {
-    "BotName": {
-      "type": "string"
-    },
-    "TargetGuild": {
-      "type": "integer"
-    },
-    "TargetChannel": {
-      "type": "integer"
-    },
-    "Token": {
-      "type": "string"
-    },
-    "GaiusAPIKey": {
-      "type": "string"
-    },
-    "AWS": {
-      "type": "object",
-      "properties": {
-        "AccessKey": {
-          "type": "string"
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "BotName": {
+            "type": "string"
         },
-        "SecretAccessKey": {
-          "type": "string"
+        "TargetGuild": {
+            "type": "integer"
         },
-        "Region": {
-          "type": "string"
+        "TargetChannel": {
+            "type": "integer"
         },
-        "CloudWatch": {
-          "type": "object",
-          "properties": {
-            "Enabled": {
-              "type": "boolean"
+        "Token": {
+            "type": "string"
+        },
+        "GaiusAPIKey": {
+            "type": "string"
+        },
+        "AWS": {
+            "type": "object",
+            "properties": {
+                "AccessKey": {
+                    "type": "string"
+                },
+                "SecretAccessKey": {
+                    "type": "string"
+                },
+                "Region": {
+                    "type": "string"
+                },
+                "CloudWatch": {
+                    "type": "object",
+                    "properties": {
+                        "Enabled": {
+                            "type": "boolean"
+                        },
+                        "LogGroup": {
+                            "type": "string"
+                        },
+                        "MetricNamespace": {
+                            "type": "string"
+                        }
+                    }
+                }
             },
-            "LogGroup": {
-              "type": "string"
+            "required": [
+                "AccessKey",
+                "SecretAccessKey",
+                "Region"
+            ]
+        },
+        "StaffAnnounceChannel": {
+            "type": "integer"
+        },
+        "StaffRoleID": {
+            "type": "integer"
+        },
+        "NewMemberRoleID": {
+            "type": "integer"
+        },
+        "MemberRoleID": {
+            "type": "integer"
+        },
+        "AuthorizedStaffID": {
+            "type": "array",
+            "items": [{
+                    "type": "integer"
+                },
+                {
+                    "type": "integer"
+                }
+            ]
+        },
+        "AutoMemberConfig": {
+            "type": "object",
+            "properties": {
+                "HoldRole": {
+                    "type": "integer"
+                },
+                "IntroductionChannel": {
+                    "type": "integer"
+                },
+                "MinimumJoinAge": {
+                    "type": "integer"
+                },
+                "MinimumMessages": {
+                    "type": "integer"
+                },
+                "MinimumMessageTime": {
+                    "type": "integer"
+                },
+                "EnableGaiusCheck": {
+                    "type": "boolean"
+                },
+                "RequiredRoles": {
+                    "type": "array",
+                    "items": [{
+                            "type": "object",
+                            "properties": {
+                                "GroupName": {
+                                    "type": "string"
+                                },
+                                "Roles": {
+                                    "type": "array",
+                                    "items": [{
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        }
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "GroupName",
+                                "Roles"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "GroupName": {
+                                    "type": "string"
+                                },
+                                "Roles": {
+                                    "type": "array",
+                                    "items": [{
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        }
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "GroupName",
+                                "Roles"
+                            ]
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "GroupName": {
+                                    "type": "string"
+                                },
+                                "Roles": {
+                                    "type": "array",
+                                    "items": [{
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        },
+                                        {
+                                            "type": "integer"
+                                        }
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "GroupName",
+                                "Roles"
+                            ]
+                        }
+                    ]
+                }
             },
-            "MetricNamespace": {
-              "type": "string"
+            "required": [
+                "HoldRole",
+                "IntroductionChannel",
+                "MinimumJoinAge",
+                "MinimumMessages",
+                "MinimumMessageTime",
+                "EnableGaiusCheck",
+                "RequiredRoles"
+            ]
+        },
+        "Teams": {
+            "type": "array",
+            "items": [{
+                    "type": "object",
+                    "properties": {
+                        "InternalID": {
+                            "type": "string"
+                        },
+                        "Name": {
+                            "type": "string"
+                        },
+                        "ID": {
+                            "type": "integer"
+                        },
+                        "Teamleader": {
+                            "type": "integer"
+                        },
+                        "Color": {
+                            "type": "integer"
+                        },
+                        "Priority": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "InternalID",
+                        "Name",
+                        "ID",
+                        "Teamleader",
+                        "Color",
+                        "Priority"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "InternalID": {
+                            "type": "string"
+                        },
+                        "Name": {
+                            "type": "string"
+                        },
+                        "ID": {
+                            "type": "integer"
+                        },
+                        "Teamleader": {
+                            "type": "integer"
+                        },
+                        "Color": {
+                            "type": "integer"
+                        },
+                        "Priority": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "InternalID",
+                        "Name",
+                        "ID",
+                        "Teamleader",
+                        "Color",
+                        "Priority"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "InternalID": {
+                            "type": "string"
+                        },
+                        "Name": {
+                            "type": "string"
+                        },
+                        "ID": {
+                            "type": "integer"
+                        },
+                        "Teamleader": {
+                            "type": "integer"
+                        },
+                        "Color": {
+                            "type": "integer"
+                        },
+                        "Priority": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "InternalID",
+                        "Name",
+                        "ID",
+                        "Teamleader",
+                        "Color",
+                        "Priority"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "InternalID": {
+                            "type": "string"
+                        },
+                        "Name": {
+                            "type": "string"
+                        },
+                        "ID": {
+                            "type": "integer"
+                        },
+                        "Teamleader": {
+                            "type": "integer"
+                        },
+                        "Color": {
+                            "type": "integer"
+                        },
+                        "Priority": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "InternalID",
+                        "Name",
+                        "ID",
+                        "Teamleader",
+                        "Color",
+                        "Priority"
+                    ]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "InternalID": {
+                            "type": "string"
+                        },
+                        "Name": {
+                            "type": "string"
+                        },
+                        "ID": {
+                            "type": "integer"
+                        },
+                        "Teamleader": {
+                            "type": "integer"
+                        },
+                        "Color": {
+                            "type": "integer"
+                        },
+                        "Priority": {
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "InternalID",
+                        "Name",
+                        "ID",
+                        "Teamleader",
+                        "Color",
+                        "Priority"
+                    ]
+                }
+            ]
+        },
+      "FunCommands": {
+        "type": "object",
+        "properties": {
+          "bam": {
+            "type": "object",
+            "properties": {
+              "Phrases": {
+                "type": "array"
+              },
+              "NoMentionPhrases": {
+                "type": "array"
+              }
+            }
+          },
+          "warm": {
+            "type": "object",
+            "properties": {
+              "Phrases": {
+                "type": "array"
+              },
+              "NoMentionPhrases": {
+                "type": "array"
+              }
+            }
+          },
+          "lick": {
+            "type": "object",
+            "properties": {
+              "Phrases": {
+                "type": "array"
+              },
+              "NoMentionPhrases": {
+                "type": "array"
+              }
             }
           }
         }
-      },
-      "required": [
-        "AccessKey",
-        "SecretAccessKey",
-        "Region"
-      ]
+      }
     },
-    "StaffAnnounceChannel": {
-      "type": "integer"
-    },
-    "StaffRoleID": {
-      "type": "integer"
-    },
-    "NewMemberRoleID": {
-      "type": "integer"
-    },
-    "MemberRoleID": {
-      "type": "integer"
-    },
-    "AuthorizedStaffID": {
-      "type": "array",
-      "items": [
-        {
-          "type": "integer"
-        },
-        {
-          "type": "integer"
-        }
-      ]
-    },
-    "AutoMemberConfig": {
-      "type": "object",
-      "properties": {
-        "HoldRole": {
-          "type": "integer"
-        },
-        "IntroductionChannel": {
-          "type": "integer"
-        },
-        "MinimumJoinAge": {
-          "type": "integer"
-        },
-        "MinimumMessages": {
-          "type": "integer"
-        },
-        "MinimumMessageTime": {
-          "type": "integer"
-        },
-        "EnableGaiusCheck": {
-          "type": "boolean"
-        },
-        "RequiredRoles": {
-          "type": "array",
-          "items": [
-            {
-              "type": "object",
-              "properties": {
-                "GroupName": {
-                  "type": "string"
-                },
-                "Roles": {
-                  "type": "array",
-                  "items": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "GroupName",
-                "Roles"
-              ]
-            },
-            {
-              "type": "object",
-              "properties": {
-                "GroupName": {
-                  "type": "string"
-                },
-                "Roles": {
-                  "type": "array",
-                  "items": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "GroupName",
-                "Roles"
-              ]
-            },
-            {
-              "type": "object",
-              "properties": {
-                "GroupName": {
-                  "type": "string"
-                },
-                "Roles": {
-                  "type": "array",
-                  "items": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "integer"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "GroupName",
-                "Roles"
-              ]
-            }
-          ]
-        }
-      },
-      "required": [
-        "HoldRole",
-        "IntroductionChannel",
-        "MinimumJoinAge",
-        "MinimumMessages",
-        "MinimumMessageTime",
-        "EnableGaiusCheck",
-        "RequiredRoles"
-      ]
-    },
-    "Teams": {
-      "type": "array",
-      "items": [
-        {
-          "type": "object",
-          "properties": {
-            "InternalID": {
-              "type": "string"
-            },
-            "Name": {
-              "type": "string"
-            },
-            "ID": {
-              "type": "integer"
-            },
-            "Teamleader": {
-              "type": "integer"
-            },
-            "Color": {
-              "type": "integer"
-            },
-            "Priority": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "InternalID",
-            "Name",
-            "ID",
-            "Teamleader",
-            "Color",
-            "Priority"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "InternalID": {
-              "type": "string"
-            },
-            "Name": {
-              "type": "string"
-            },
-            "ID": {
-              "type": "integer"
-            },
-            "Teamleader": {
-              "type": "integer"
-            },
-            "Color": {
-              "type": "integer"
-            },
-            "Priority": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "InternalID",
-            "Name",
-            "ID",
-            "Teamleader",
-            "Color",
-            "Priority"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "InternalID": {
-              "type": "string"
-            },
-            "Name": {
-              "type": "string"
-            },
-            "ID": {
-              "type": "integer"
-            },
-            "Teamleader": {
-              "type": "integer"
-            },
-            "Color": {
-              "type": "integer"
-            },
-            "Priority": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "InternalID",
-            "Name",
-            "ID",
-            "Teamleader",
-            "Color",
-            "Priority"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "InternalID": {
-              "type": "string"
-            },
-            "Name": {
-              "type": "string"
-            },
-            "ID": {
-              "type": "integer"
-            },
-            "Teamleader": {
-              "type": "integer"
-            },
-            "Color": {
-              "type": "integer"
-            },
-            "Priority": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "InternalID",
-            "Name",
-            "ID",
-            "Teamleader",
-            "Color",
-            "Priority"
-          ]
-        },
-        {
-          "type": "object",
-          "properties": {
-            "InternalID": {
-              "type": "string"
-            },
-            "Name": {
-              "type": "string"
-            },
-            "ID": {
-              "type": "integer"
-            },
-            "Teamleader": {
-              "type": "integer"
-            },
-            "Color": {
-              "type": "integer"
-            },
-            "Priority": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "InternalID",
-            "Name",
-            "ID",
-            "Teamleader",
-            "Color",
-            "Priority"
-          ]
-        }
-      ]
-    }
-  },
-  "required": [
-    "BotName",
-    "TargetGuild",
-    "TargetChannel",
-    "Token",
-    "GaiusAPIKey",
-    "AWS",
-    "StaffAnnounceChannel",
-    "StaffRoleID",
-    "NewMemberRoleID",
-    "MemberRoleID",
-    "AuthorizedStaffID",
-    "AutoMemberConfig",
-    "Teams"
-  ]
+    "required": [
+        "BotName",
+        "TargetGuild",
+        "TargetChannel",
+        "Token",
+        "GaiusAPIKey",
+        "AWS",
+        "StaffAnnounceChannel",
+        "StaffRoleID",
+        "NewMemberRoleID",
+        "MemberRoleID",
+        "AuthorizedStaffID",
+        "AutoMemberConfig",
+        "Teams"
+    ]
 }
-
