@@ -2,7 +2,6 @@
 using System.Runtime.Caching;
 using Discord;
 using Discord.Interactions;
-using Microsoft.Extensions.Configuration;
 using PaxAndromeda.Instar.Metrics;
 using PaxAndromeda.Instar.Modals;
 using PaxAndromeda.Instar.Services;
@@ -14,14 +13,11 @@ namespace PaxAndromeda.Instar.Commands;
 [SuppressMessage("ReSharper", "ClassCanBeSealed.Global")]
 public class ReportUserCommand : BaseCommand, IContextCommand
 {
+    private readonly IDynamicConfigService _dynamicConfig;
     private readonly IMetricService _metricService;
     private const string ModalId = "respond_modal";
 
     private static readonly MemoryCache Cache = new("User Report Cache");
-    private readonly ulong _staffAnnounceChannel;
-#if !DEBUG
-    private readonly ulong _staffRoleId;
-#endif
 
     internal static void PurgeCache()
     {
@@ -29,14 +25,10 @@ public class ReportUserCommand : BaseCommand, IContextCommand
             Cache.Remove(n.Key, CacheEntryRemovedReason.Removed);
     }
 
-    public ReportUserCommand(IConfiguration config, IMetricService metricService)
+    public ReportUserCommand(IDynamicConfigService dynamicConfig, IMetricService metricService)
     {
+        _dynamicConfig = dynamicConfig;
         _metricService = metricService;
-        _staffAnnounceChannel = config.GetValue<ulong>("StaffAnnounceChannel");
-
-#if !DEBUG
-        _staffRoleId = config.GetValue<ulong>("StaffRoleID");
-#endif
     }
 
     [ExcludeFromCodeCoverage(Justification = "Constant used for mapping")]
@@ -82,6 +74,8 @@ public class ReportUserCommand : BaseCommand, IContextCommand
 
     private async Task SendReportMessage(ReportMessageModal modal, IMessage message, IInstarGuild guild)
     {
+        var cfg = await _dynamicConfig.GetConfig();
+        
         var fields = new List<EmbedFieldBuilder>
         {
             new EmbedFieldBuilder()
@@ -123,11 +117,11 @@ public class ReportUserCommand : BaseCommand, IContextCommand
 #if DEBUG
         const string staffPing = "{{staffping}}";
 #else
-        var staffPing = $"<@&{_staffRoleId}>";
+        var staffPing = Snowflake.GetMention(() => cfg.StaffRoleID);
 #endif
 
         await
-            Context.Guild.GetTextChannel(_staffAnnounceChannel)
+            Context.Guild.GetTextChannel(cfg.StaffAnnounceChannel)
                 .SendMessageAsync(staffPing, embed: builder.Build());
 
         await _metricService.Emit(Metric.ReportUser_ReportsSent, 1);

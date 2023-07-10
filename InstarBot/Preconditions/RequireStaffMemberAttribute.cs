@@ -1,35 +1,38 @@
 using Discord;
 using Discord.Interactions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PaxAndromeda.Instar.Services;
 using Serilog;
 
 namespace PaxAndromeda.Instar.Preconditions;
 
 public sealed class RequireStaffMemberAttribute : PreconditionAttribute
 {
-    public override Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context,
+    public override async Task<PreconditionResult> CheckRequirementsAsync(IInteractionContext context,
         ICommandInfo commandInfo, IServiceProvider services)
     {
-        var config = services.GetService<IConfiguration>();
+        var dynamicConfig = services.GetService<IDynamicConfigService>();
 
-        var authorizedStaffRoles = config?.GetSection("AuthorizedStaffID").Get<List<ulong>>();
-        if (authorizedStaffRoles is null)
+        if (dynamicConfig is null)
         {
-            Log.Error("Authorized staff roles are not set in config!");
-            return Task.FromResult(PreconditionResult.FromError("Unable to determine eligibility to run this command"));
+            Log.Error("Failed to determine command requirements due to configuration mishap");
+            return PreconditionResult.FromError("Unable to determine eligibility to run this command.");
         }
+        
+        var cfg = await dynamicConfig.GetConfig();
+
+        var authorizedStaffRoles = cfg.AuthorizedStaffID.Select(n => n.ID);
 
         if (context.User is not IGuildUser guildUser)
         {
             Log.Warning("Context user is not IGuildUser!");
-            return Task.FromResult(PreconditionResult.FromError("Unable to determine eligibility to run this command"));
+            return PreconditionResult.FromError("Unable to determine eligibility to run this command");
         }
 
         var intersection = guildUser.RoleIds.Intersect(authorizedStaffRoles);
 
-        return Task.FromResult(intersection.Any()
+        return intersection.Any()
             ? PreconditionResult.FromSuccess()
-            : PreconditionResult.FromError("You are not eligible to run this command"));
+            : PreconditionResult.FromError("You are not eligible to run this command");
     }
 }

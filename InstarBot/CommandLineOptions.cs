@@ -7,5 +7,6 @@ namespace PaxAndromeda.Instar;
 internal class CommandLineOptions
 {
     [Option('c', "config-path", Required = false, HelpText = "Sets the configuration path.")]
-    public string ConfigPath { get; set; } = null!;
+    [UsedImplicitly]
+    public string? ConfigPath { get; }
 }

@@ -20,11 +20,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Config\Instar.test.debug.conf.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <None Update="Config\Instar.test.bare.conf.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-        <None Update="Config\Instar.test.conf.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <None Update="Config\Instar.dynamic.test.conf.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Config\Instar.dynamic.test.debug.conf.json">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
 

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
-namespace PaxAndromeda.Instar.Services;
+namespace PaxAndromeda.Instar;
 
 [StructLayout(LayoutKind.Sequential)]
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]

@@ -1,7 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Ardalis.GuardClauses;
 using Discord;
-using Microsoft.Extensions.Configuration;
 using PaxAndromeda.Instar.ConfigModels;
 using Serilog;
 
@@ -11,67 +9,62 @@ namespace PaxAndromeda.Instar.Services;
 [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
 public sealed class TeamService
 {
-    private readonly Dictionary<string, Team> _teams;
-    private readonly Dictionary<Snowflake, string> _teamIdRefMap;
+    private readonly IDynamicConfigService _dynamicConfig;
 
-    public TeamService(IConfiguration config)
+    public TeamService(IDynamicConfigService dynamicConfig)
     {
-        var teamList = config.GetSection("Teams").Get<List<Team>>();
-        Guard.Against.Null(teamList);
+        _dynamicConfig = dynamicConfig;
+    }
+
+    public async Task<bool> Exists(string teamRef)
+    {
+        var cfg = await _dynamicConfig.GetConfig();
         
-        var teamsConfig = teamList.ToDictionary(n => n.InternalID, n => n);
-        var teamIdRefMap = teamList.ToDictionary(n => n.ID, n => n.InternalID);
-
-        if (teamsConfig is null || teamIdRefMap is null)
-            throw new ConfigurationException(
-                "Instar configuration doesn't appear to have teams configured, or the configuration was loaded incorrectly.");
-
-        _teams = teamsConfig;
-        _teamIdRefMap = teamIdRefMap;
+        return cfg.Teams.Any(n => n.InternalID.Equals(teamRef, StringComparison.Ordinal));
     }
 
-    public bool Exists(string teamRef)
+    public async Task<bool> Exists(Snowflake snowflake)
     {
-        return _teams.ContainsKey(teamRef);
+        var cfg = await _dynamicConfig.GetConfig();
+        
+        return cfg.Teams.Any(n => n.ID.ID == snowflake.ID);
     }
 
-    public bool Exists(Snowflake snowflake)
+    public async Task<Team> Get(string teamRef)
     {
-        return _teamIdRefMap.ContainsKey(snowflake);
+        var cfg = await _dynamicConfig.GetConfig();
+        
+        return cfg.Teams.First(n => n.InternalID.Equals(teamRef, StringComparison.Ordinal));
     }
 
-    public Team Get(string teamRef)
+    public async Task<Team> Get(Snowflake snowflake)
     {
-        return _teams[teamRef];
+        var cfg = await _dynamicConfig.GetConfig();
+        
+        return cfg.Teams.First(n => n.ID.ID == snowflake.ID);
     }
 
-    public Team Get(Snowflake snowflake)
+    public async IAsyncEnumerable<Team> GetTeams(PageTarget pageTarget)
     {
-        return Get(_teamIdRefMap[snowflake]);
-    }
-
-    public IEnumerable<Team> GetTeams(PageTarget pageTarget)
-    {
+        var cfg = await _dynamicConfig.GetConfig();
         var teamRefs = pageTarget.GetAttributesOfType<TeamRefAttribute>()?.Select(n => n.InternalID) ??
                        new List<string>();
 
         foreach (var internalId in teamRefs)
         {
-            if (!_teams.ContainsKey(internalId))
-                throw new InvalidStateException("Failed to find team with internal ID " + internalId);
-
-            yield return _teams[internalId];
+            
+            yield return cfg.Teams.First(n => n.InternalID.Equals(internalId, StringComparison.Ordinal));
         }
     }
 
-    public string GetTeamLeadMention(PageTarget pageTarget)
+    public async Task<string> GetTeamLeadMention(PageTarget pageTarget)
     {
-        return string.Join(' ', GetTeams(pageTarget).Select(n => Snowflake.GetMention(() => n.Teamleader)));
+        return string.Join(' ', await GetTeams(pageTarget).Select(n => Snowflake.GetMention(() => n.Teamleader)).ToArrayAsync());
     }
 
-    public string GetTeamMention(PageTarget pageTarget)
+    public async Task<string> GetTeamMention(PageTarget pageTarget)
     {
-        return string.Join(' ', GetTeams(pageTarget).Select(n => Snowflake.GetMention(() => n.ID)));
+        return string.Join(' ', await GetTeams(pageTarget).Select(n => Snowflake.GetMention(() => n.ID)).ToArrayAsync());
     }
 
     /// <summary>
@@ -79,16 +72,16 @@ public sealed class TeamService
     /// </summary>
     /// <param name="user">The user in question</param>
     /// <returns>The user's highest staff team, or null if the user is not staff.</returns>
-    public Team? GetUserPrimaryStaffTeam(IGuildUser user)
+    public async Task<Team?> GetUserPrimaryStaffTeam(IGuildUser user)
     {
         Team? highestTeam = null;
         Log.Debug("User roles: {Roles}", string.Join(", ", user.RoleIds));
         foreach (var role in user.RoleIds.Select(n => new Snowflake(n)))
         {
-            if (!Exists(role))
+            if (!await Exists(role))
                 continue;
 
-            var st = Get(role);
+            var st = await Get(role);
 
             Log.Debug("Team role found: {Role} with internal ID {InternalID}", role.ID, st.InternalID);
 

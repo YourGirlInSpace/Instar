@@ -14,12 +14,13 @@ namespace PaxAndromeda.Instar.Services;
 [ExcludeFromCodeCoverage]
 public sealed class DiscordService : IDiscordService
 {
-    private readonly string _botToken;
+    private string _botToken = null!;
 
     private readonly Dictionary<string, IContextCommand> _contextCommands;
     private readonly ulong _guild;
     private readonly InteractionService _interactionService;
     private readonly IServiceProvider _provider;
+    private readonly IDynamicConfigService _dynamicConfig;
     private readonly DiscordSocketClient _socketClient;
     private readonly AsyncEvent<IGuildUser> _userJoinedEvent = new();
     private readonly AsyncEvent<IMessage> _messageReceivedEvent = new();
@@ -43,9 +44,10 @@ public sealed class DiscordService : IDiscordService
         remove => _messageDeletedEvent.Remove(value);
     }
 
-    public DiscordService(IServiceProvider provider, IConfiguration config)
+    public DiscordService(IServiceProvider provider, IConfiguration config, IDynamicConfigService dynamicConfig)
     {
         _provider = provider;
+        _dynamicConfig = dynamicConfig;
 
         _socketClient = new DiscordSocketClient(new DiscordSocketConfig
         {
@@ -73,13 +75,10 @@ public sealed class DiscordService : IDiscordService
         _contextCommands = provider.GetServices<IContextCommand>().ToDictionary(n => n.Name, n => n);
 
         _guild = config.GetValue("TargetGuild", 0ul);
-        _botToken = config.GetValue<string>("Token") ?? string.Empty;
 
         // Validate
         if (_guild == 0)
             throw new ConfigurationException("TargetGuild is not set");
-        if (string.IsNullOrEmpty(_botToken))
-            throw new ConfigurationException("Token is not set");
     }
 
     private async Task HandleMessageCommand(SocketMessageCommand arg)
@@ -123,6 +122,10 @@ public sealed class DiscordService : IDiscordService
     public async Task Start(IServiceProvider provider)
     {
         Log.Information("Attempting to connect to Discord...");
+
+        _botToken = await _dynamicConfig.GetParameter("DiscordKey") ?? throw new ConfigurationException("Failed to obtain Discord key from AWS");
+        if (string.IsNullOrEmpty(_botToken))
+            throw new ConfigurationException("Token is not set");
 
         _socketClient.Ready += async () =>
         {

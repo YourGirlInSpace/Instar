@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Ardalis.GuardClauses;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using PaxAndromeda.Instar.Converters;
 
 namespace PaxAndromeda.Instar;
@@ -25,6 +26,7 @@ namespace PaxAndromeda.Instar;
 ///         this number is incremented.
 /// </remarks>
 [TypeConverter(typeof(SnowflakeConverter))]
+[JsonConverter(typeof(JSnowflakeConverter))]
 public sealed class Snowflake : IEquatable<Snowflake>
 {
     private static int _increment;

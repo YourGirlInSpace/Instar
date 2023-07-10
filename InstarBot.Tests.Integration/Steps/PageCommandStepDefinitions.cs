@@ -2,12 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using Discord;
 using FluentAssertions;
 using InstarBot.Tests.Services;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 using PaxAndromeda.Instar;
 using PaxAndromeda.Instar.Commands;
-using PaxAndromeda.Instar.ConfigModels;
 
 namespace InstarBot.Tests.Integration;
 
@@ -22,9 +20,9 @@ public sealed class PageCommandStepDefinitions
     }
 
     [Given("the user is in team (.*)")]
-    public void GivenTheUserIsInTeam(PageTarget target)
+    public async Task GivenTheUserIsInTeam(PageTarget target)
     {
-        var team = TestUtilities.GetTeams(target).First();
+        var team = await TestUtilities.GetTeams(target).FirstAsync();
         _scenarioContext.Add("UserTeamID", team.ID);
     }
 
@@ -65,7 +63,7 @@ public sealed class PageCommandStepDefinitions
     }
 
     [Then("Instar should emit a valid Page embed")]
-    public void ThenInstarShouldEmitAValidPageEmbed()
+    public async Task ThenInstarShouldEmitAValidPageEmbed()
     {
         _scenarioContext.ContainsKey("Command").Should().BeTrue();
         _scenarioContext.ContainsKey("PageTarget").Should().BeTrue();
@@ -80,7 +78,7 @@ public sealed class PageCommandStepDefinitions
         }
         else
         {
-            var team = TestUtilities.GetTeams(pageTarget).First();
+            var team = await TestUtilities.GetTeams(pageTarget).FirstAsync();
             expectedString = Snowflake.GetMention(() => team.ID);
         }
 
@@ -92,7 +90,7 @@ public sealed class PageCommandStepDefinitions
     }
 
     [Then("Instar should emit a valid teamleader Page embed")]
-    public void ThenInstarShouldEmitAValidTeamleaderPageEmbed()
+    public async Task ThenInstarShouldEmitAValidTeamleaderPageEmbed()
     {
         _scenarioContext.ContainsKey("Command").Should().BeTrue();
         _scenarioContext.ContainsKey("PageTarget").Should().BeTrue();
@@ -102,29 +100,30 @@ public sealed class PageCommandStepDefinitions
 
         command.Protected().Verify(
             "RespondAsync", Times.Once(),
-            $"<@{GetTeamLead(pageTarget)}>", ItExpr.IsNull<Embed[]>(),
+            $"<@{await GetTeamLead(pageTarget)}>", ItExpr.IsNull<Embed[]>(),
             false, false, AllowedMentions.All, ItExpr.IsNull<RequestOptions>(),
             ItExpr.IsNull<MessageComponent>(), ItExpr.IsAny<Embed>());
     }
 
-    private static ulong GetTeamLead(PageTarget pageTarget)
+    private static async Task<ulong> GetTeamLead(PageTarget pageTarget)
     {
+        var dynamicConfig = await TestUtilities.GetDynamicConfiguration().GetConfig();
+        
         var teamsConfig =
-            TestUtilities.GetTestConfiguration().GetSection("Teams").Get<List<Team>>()?
-                .ToDictionary(n => n.InternalID, n => n);
+            dynamicConfig.Teams.ToDictionary(n => n.InternalID, n => n);
 
         // Eeeeeeeeeeeeevil
-        return teamsConfig![pageTarget.GetAttributesOfType<TeamRefAttribute>()?.First().InternalID ?? "idkjustfail"]
+        return teamsConfig[pageTarget.GetAttributesOfType<TeamRefAttribute>()?.First().InternalID ?? "idkjustfail"]
             .Teamleader;
     }
 
     [Then("Instar should emit a valid All Page embed")]
-    public void ThenInstarShouldEmitAValidAllPageEmbed()
+    public async Task ThenInstarShouldEmitAValidAllPageEmbed()
     {
         _scenarioContext.ContainsKey("Command").Should().BeTrue();
         var command = _scenarioContext.Get<Mock<PageCommand>>("Command");
         var expected = string.Join(' ',
-            TestUtilities.GetTeams(PageTarget.All).Select(n => Snowflake.GetMention(() => n.ID)));
+            await TestUtilities.GetTeams(PageTarget.All).Select(n => Snowflake.GetMention(() => n.ID)).ToArrayAsync());
 
         command.Protected().Verify(
             "RespondAsync", Times.Once(),
