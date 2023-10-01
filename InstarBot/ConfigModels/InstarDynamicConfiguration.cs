@@ -30,6 +30,7 @@ public class DynamicAWSConfig
     public string SecretAccessKey { get; set; } = null!;
     public string Region { get; set; } = null!;
     public DynamicCloudWatchConfig CloudWatch { get; set; } = null!;
+    public DynamicAppConfigConfig AppConfig { get; set; } = null!;
 }
 
 [UsedImplicitly]
@@ -38,6 +39,12 @@ public class DynamicCloudWatchConfig
     public bool Enabled { get; set; }
     public string LogGroup { get; set; } = null!;
     public string MetricNamespace { get; set; } = null!;
+}
+
+[UsedImplicitly]
+public class DynamicAppConfigConfig
+{
+    public string ParameterNamespace { get; set; } = null!;
 }
 
 [UsedImplicitly]

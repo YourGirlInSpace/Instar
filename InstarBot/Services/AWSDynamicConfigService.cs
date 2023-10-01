@@ -22,12 +22,6 @@ public interface IDynamicConfigService
 
 public sealed class AWSDynamicConfigService : IDynamicConfigService
 {
-    #if DEBUG
-    private const string ParameterNamespace = "/Instar/Test";
-    #else
-    private const string ParameterNamespace = "/Instar/Production";
-    #endif
-    
     private readonly AmazonAppConfigDataClient _appConfigDataClient;
     private readonly AmazonSimpleSystemsManagementClient _ssmClient;
     private string _configData = null!;
@@ -57,6 +51,10 @@ public sealed class AWSDynamicConfigService : IDynamicConfigService
         _configProfile = appConfigSection.GetValue<string>("ConfigurationProfile") ??
                          throw new ConfigurationException("Invalid AppConfig/ConfigurationProfile configuration");
 
+
+        Log.Information("AppConfig Application={Application}, Environment={Environment}, ConfigProfile={ConfigProfile}",
+            _application, _environment, _configProfile);
+
         _appConfigDataClient = new AmazonAppConfigDataClient(iam, RegionEndpoint.GetBySystemName(region));
         _ssmClient = new AmazonSimpleSystemsManagementClient(iam, RegionEndpoint.GetBySystemName(region));
     }
@@ -79,9 +77,11 @@ public sealed class AWSDynamicConfigService : IDynamicConfigService
 
     public async Task<string?> GetParameter(string parameterName)
     {
+        var config = await GetConfig();
+        
         var response = await _ssmClient.GetParameterAsync(new GetParameterRequest
         {
-            Name = $"{ParameterNamespace}/{parameterName}",
+            Name = $"{config.AWS.AppConfig.ParameterNamespace}/{parameterName}",
             WithDecryption = true
         });
 

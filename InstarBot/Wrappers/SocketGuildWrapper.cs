@@ -15,7 +15,7 @@ public class SocketGuildWrapper : IInstarGuild
 
     public SocketGuildWrapper(SocketGuild guild)
     {
-        _guild = guild;
+        _guild = guild ?? throw new ArgumentNullException(nameof(guild));
     }
 
     public virtual ulong Id => _guild.Id;

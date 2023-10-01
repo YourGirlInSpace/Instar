@@ -33,7 +33,8 @@ internal static class Program
 
         if (!string.IsNullOrEmpty(cli.ConfigPath))
             configPath = cli.ConfigPath;
-
+        
+        Log.Information("Config path is {Path}", configPath);
         IConfiguration config = new ConfigurationBuilder()
             .AddJsonFile(configPath)
             .Build();
