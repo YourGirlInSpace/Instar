@@ -4,9 +4,9 @@ using JetBrains.Annotations;
 namespace PaxAndromeda.Instar;
 
 [UsedImplicitly]
-internal class CommandLineOptions
+public class CommandLineOptions
 {
     [Option('c', "config-path", Required = false, HelpText = "Sets the configuration path.")]
     [UsedImplicitly]
-    public string? ConfigPath { get; }
+    public string? ConfigPath { get; set; }
 }

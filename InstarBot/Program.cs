@@ -34,19 +34,6 @@ internal static class Program
         if (!string.IsNullOrEmpty(cli.ConfigPath))
             configPath = cli.ConfigPath;
 
-        // Initial check:  Is the configuration valid?
-        /*try
-        {
-            ValidateConfiguration(configPath);
-        }
-        catch (Exception ex)
-        {
-            // At this point, the logger is not yet created
-            Console.WriteLine("FATAL:  Malformed configuration!  Aborting!");
-            Console.WriteLine(ex.ToString());
-            return;
-        }*/
-
         IConfiguration config = new ConfigurationBuilder()
             .AddJsonFile(configPath)
             .Build();
