@@ -32,7 +32,7 @@ public sealed class PageCommandStepDefinitions
         _scenarioContext.Add("UserTeamID", new Snowflake());
     }
 
-    [Given("the user is paging (CommunityManager|Helper|Moderator|Admin|Owner|Test|All)")]
+    [Given("the user is paging (Helper|Moderator|Admin|Owner|Test|All)")]
     [SuppressMessage("ReSharper", "SpecFlow.MethodNameMismatchPattern")]
     public void GivenTheUserIsPaging(PageTarget target)
     {
@@ -40,7 +40,7 @@ public sealed class PageCommandStepDefinitions
         _scenarioContext.Add("PagingTeamLeader", false);
     }
 
-    [Given("the user is paging the (CommunityManager|Helper|Moderator|Admin|Owner|Test|All) teamleader")]
+    [Given("the user is paging the (Helper|Moderator|Admin|Owner|Test|All) teamleader")]
     [SuppressMessage("ReSharper", "SpecFlow.MethodNameMismatchPattern")]
     public void GivenTheUserIsPagingTheTeamTeamleader(PageTarget target)
     {

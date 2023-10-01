@@ -106,7 +106,7 @@ public class PageCommand : BaseCommand
             return true;
 
         // Check permissions.  Only mod+ can send an "all" page
-        if (team.Priority > 3 && pageTarget == PageTarget.All) // i.e. Helper, Community Manager
+        if (team.Priority > 3 && pageTarget == PageTarget.All) // i.e. Helper
         {
             response = "You are not authorized to send a page to the entire staff team.";
             Log.Information("{User} was not authorized to send a page to the entire staff team", user.Id);
