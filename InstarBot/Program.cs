@@ -4,8 +4,6 @@ using Amazon.CloudWatchLogs;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
 using PaxAndromeda.Instar.Commands;
 using PaxAndromeda.Instar.Services;
 using Serilog;
@@ -37,7 +35,7 @@ internal static class Program
             configPath = cli.ConfigPath;
 
         // Initial check:  Is the configuration valid?
-        try
+        /*try
         {
             ValidateConfiguration(configPath);
         }
@@ -47,7 +45,7 @@ internal static class Program
             Console.WriteLine("FATAL:  Malformed configuration!  Aborting!");
             Console.WriteLine(ex.ToString());
             return;
-        }
+        }*/
 
         IConfiguration config = new ConfigurationBuilder()
             .AddJsonFile(configPath)
@@ -67,23 +65,14 @@ internal static class Program
         _cts.Cancel();
     }
 
-    private static void ValidateConfiguration(string configPath)
-    {
-        Console.WriteLine("Loading configuration from " + configPath);
-        
-        var schemaData = File.ReadAllText(Path.Combine(Path.GetDirectoryName(configPath) ?? "Config", "Instar.conf.schema.json"));
-        var configData = File.ReadAllText(configPath);
-        
-        var schema = JSchema.Parse(schemaData);
-
-        var jObject = JObject.Parse(configData);
-        jObject.Validate(schema);
-    }
-
     private static async Task RunAsync(IConfiguration config)
     {
         _cts = new CancellationTokenSource();
         _services = ConfigureServices(config);
+
+        // First, we need to ensure that our dynamic config is loaded and available
+        var dynamicConfig = _services.GetRequiredService<IDynamicConfigService>();
+        await dynamicConfig.Initialize();
 
         var discordService = _services.GetRequiredService<IDiscordService>();
         await discordService.Start(_services);
@@ -142,6 +131,7 @@ internal static class Program
         services.AddTransient<IGaiusAPIService, GaiusAPIService>();
         services.AddSingleton<IDiscordService, DiscordService>();
         services.AddSingleton<AutoMemberSystem>();
+        services.AddSingleton<IDynamicConfigService, AWSDynamicConfigService>();
         
         // Commands & Interactions
         services.AddTransient<PingCommand>();

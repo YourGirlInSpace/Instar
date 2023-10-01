@@ -1,10 +1,6 @@
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using PaxAndromeda.Instar.Gaius;
-
-#if !DEBUG
 using System.Text;
-#endif
 
 namespace PaxAndromeda.Instar.Services;
 
@@ -12,32 +8,53 @@ public sealed class GaiusAPIService : IGaiusAPIService
 {
     // Used in release mode
     // ReSharper disable once NotAccessedField.Local
-    private readonly IConfiguration _config;
+    private readonly IDynamicConfigService _config;
     private const string BaseURL = "https://api.gaiusbot.me";
     private const string WarningsBaseURL = BaseURL + "/warnings";
     private const string CaselogsBaseURL = BaseURL + "/caselogs";
     
     private readonly HttpClient _client;
-    private readonly string _apiKey;
-    public GaiusAPIService(IConfiguration config)
+    private string _apiKey = null!;
+    private bool _initialized;
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
+    
+    public GaiusAPIService(IDynamicConfigService config)
     {
         _config = config;
-        _apiKey = config.GetValue<string>("GaiusAPIKey")!;
         _client = new HttpClient();
+    }
 
-#if !DEBUG
-        VerifyKey();
-#endif
+    private async Task Initialize()
+    {
+        if (_initialized)
+            return;
+        
+        await _semaphore.WaitAsync();
+        try
+        {
+            if (_initialized)
+                return;
+
+            _apiKey = await _config.GetParameter("GaiusKey") ??
+                      throw new ConfigurationException("Could not acquire Gaius API key");
+            await VerifyKey();
+            _initialized = true;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
     
-#if !DEBUG
-    private void VerifyKey()
+    private async Task VerifyKey()
     {
-        var targetGuild = _config.GetValue<ulong>("TargetGuild");
+        var cfg = await _config.GetConfig();
+        
+        var targetGuild = cfg.TargetGuild;
         var keyData = Encoding.UTF8.GetString(Convert.FromBase64String(_apiKey));
         if (!ulong.TryParse(keyData[..keyData.IndexOf(':')], out var keyGuild))
             throw new ConfigurationException("Gaius API key is not in the correct format.");
-        if (keyGuild != targetGuild)
+        if (keyGuild != targetGuild.ID)
             throw new ConfigurationException("Configured Gaius API key is not for this guild.")
             {
                 Data =
@@ -47,10 +64,11 @@ public sealed class GaiusAPIService : IGaiusAPIService
                 }
             };
     }
-#endif
     
     public async Task<IEnumerable<Warning>> GetAllWarnings()
     {
+        await Initialize();
+        
         var response = await Get($"{WarningsBaseURL}/all");
 
         var result = JsonConvert.DeserializeObject<Warning[]>(response);
@@ -59,12 +77,16 @@ public sealed class GaiusAPIService : IGaiusAPIService
     
     public async Task<IEnumerable<Caselog>> GetAllCaselogs()
     {
+        await Initialize();
+
         var response = await Get($"{CaselogsBaseURL}/all");
         return ParseCaselogs(response);
     }
 
     public async Task<IEnumerable<Warning>> GetWarningsAfter(DateTime dt)
     {
+        await Initialize();
+
         var response = await Get($"{WarningsBaseURL}/after/{dt:O}");
 
         var result = JsonConvert.DeserializeObject<Warning[]>(response);
@@ -73,18 +95,24 @@ public sealed class GaiusAPIService : IGaiusAPIService
 
     public async Task<IEnumerable<Caselog>> GetCaselogsAfter(DateTime dt)
     {
+        await Initialize();
+
         var response = await Get($"{CaselogsBaseURL}/after/{dt:O}");
         return ParseCaselogs(response);
     }
 
     public async Task<IEnumerable<Warning>?> GetWarnings(Snowflake userId)
     {
+        await Initialize();
+
         var result = await Get($"{WarningsBaseURL}/{userId.ID}");
         return JsonConvert.DeserializeObject<Warning[]>(result);
     }
 
     public async Task<IEnumerable<Caselog>?> GetCaselogs(Snowflake userId)
     {
+        await Initialize();
+
         var result = await Get($"{CaselogsBaseURL}/{userId.ID}");
         return ParseCaselogs(result);
     }

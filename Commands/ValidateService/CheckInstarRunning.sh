@@ -5,8 +5,7 @@
 # compile error reports.
 sleep 30
 
-ps -C InstarBot
-if [ $? -ne 0 ]; then
+if ! ps -C InstarBot; then
   echo "InstarBot did not start successfully."
   exit 1
 fi

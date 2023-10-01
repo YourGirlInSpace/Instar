@@ -52,7 +52,7 @@ public class CheckEligibilityCommand : BaseCommand
             return;
         }
         
-        var eligibility = _autoMemberSystem.CheckEligibility(Context.User);
+        var eligibility = await _autoMemberSystem.CheckEligibility(Context.User);
 
         Log.Debug("Building response embed...");
         var fields = new List<EmbedFieldBuilder>();

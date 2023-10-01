@@ -19,26 +19,38 @@ namespace InstarBot.Tests;
 public static class TestUtilities
 {
     private static IConfiguration? _config;
+    private static IDynamicConfigService? _dynamicConfig;
 
-    public static IConfiguration GetTestConfiguration()
+    private static IConfiguration GetTestConfiguration()
     {
         if (_config is not null)
             return _config;
 
         _config = new ConfigurationBuilder()
-#if DEBUG
-            .AddJsonFile("Config/Instar.test.debug.conf.json")
-#else
-            .AddJsonFile("Config/Instar.test.conf.json")
-#endif
+            .AddJsonFile("Config/Instar.test.bare.conf.json")
             .Build();
 
         return _config;
     }
 
+    public static IDynamicConfigService GetDynamicConfiguration()
+    {
+        if (_dynamicConfig is not null)
+            return _dynamicConfig;
+
+        #if DEBUG
+        var conf = new MockDynamicConfigService("Config/Instar.dynamic.test.debug.conf.json");
+        #else
+        var conf = new MockDynamicConfigService("Config/Instar.dynamic.test.conf.json");
+        #endif
+
+        _dynamicConfig = conf;
+        return conf;
+    }
+
     public static TeamService GetTeamService()
     {
-        return new TeamService(GetTestConfiguration());
+        return new TeamService(GetDynamicConfiguration());
     }
 
     public static IServiceProvider GetServices()
@@ -47,6 +59,7 @@ public static class TestUtilities
         sc.AddSingleton(GetTestConfiguration());
         sc.AddSingleton(GetTeamService());
         sc.AddSingleton<IInstarDDBService, MockInstarDDBService>();
+        sc.AddSingleton(GetDynamicConfiguration());
 
         return sc.BuildServiceProvider();
     }
@@ -233,11 +246,10 @@ public static class TestUtilities
         return channelMock;
     }
 
-    public static IEnumerable<Team> GetTeams(PageTarget pageTarget)
+    public static async IAsyncEnumerable<Team> GetTeams(PageTarget pageTarget)
     {
-        var teamsConfig =
-            GetTestConfiguration().GetSection("Teams").Get<List<Team>>()?
-                .ToDictionary(n => n.InternalID, n => n);
+        var config = await GetDynamicConfiguration().GetConfig();
+        var teamsConfig = config.Teams.ToDictionary(n => n.InternalID, n => n);
 
         teamsConfig.Should().NotBeNull();
 
@@ -246,7 +258,7 @@ public static class TestUtilities
 
         foreach (var internalId in teamRefs)
         {
-            if (!teamsConfig!.ContainsKey(internalId))
+            if (!teamsConfig.ContainsKey(internalId))
                 throw new KeyNotFoundException("Failed to find team with internal ID " + internalId);
 
             yield return teamsConfig[internalId];

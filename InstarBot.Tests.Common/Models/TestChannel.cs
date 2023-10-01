@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Discord;
 using PaxAndromeda.Instar;
+using MessageProperties = Discord.MessageProperties;
 
 #pragma warning disable CS1998
 #pragma warning disable CS8625

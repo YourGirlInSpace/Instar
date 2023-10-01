@@ -51,7 +51,7 @@ public class PageCommand : BaseCommand
         {
             Log.Verbose("User {User} is attempting to page {Team}: {Reason}", Context.User.Id, team, reason);
 
-            var userTeam = _teamService.GetUserPrimaryStaffTeam(Context.User);
+            var userTeam = await _teamService.GetUserPrimaryStaffTeam(Context.User);
             if (!CheckPermissions(Context.User, userTeam, team, teamLead, out var response))
             {
                 await RespondAsync(response, ephemeral: true);
@@ -62,9 +62,9 @@ public class PageCommand : BaseCommand
             if (team == PageTarget.Test)
                 mention = "This is a __**TEST**__ page.";
             else if (teamLead)
-                mention = _teamService.GetTeamLeadMention(team);
+                mention = await _teamService.GetTeamLeadMention(team);
             else
-                mention = _teamService.GetTeamMention(team);
+                mention = await _teamService.GetTeamMention(team);
 
             Log.Debug("Emitting page to {ChannelName}", Context.Channel?.Name);
             await RespondAsync(
