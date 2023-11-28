@@ -124,11 +124,10 @@ public sealed class GaiusAPIService : IGaiusAPIService
         // Remove any instances of "totalCases"
         while (response.Contains("\"totalcases\":", StringComparison.OrdinalIgnoreCase))
         {
-            var lineBoundaries = Utilities.GetLineBoundaries(
-                response,
-                response.IndexOf("\"totalcases\":", StringComparison.OrdinalIgnoreCase));
+            var start = response.IndexOf("\"totalcases\":", StringComparison.OrdinalIgnoreCase); 
+            var end = response.IndexOfAny(new[] { ',', '}' }, start);
 
-            response = response.Remove(lineBoundaries);
+            response = response.Remove(start, end - start + (response[end] == ',' ? 1 : 0));
         }
         
         if (response.Length <= 2)
