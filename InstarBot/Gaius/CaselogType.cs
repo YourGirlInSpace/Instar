@@ -14,5 +14,6 @@ public enum CaselogType
     Softban,
     [EnumMember(Value = "vcban")]
     Voiceban,
-    Timeout
+    Timeout,
+    Unban
 }
