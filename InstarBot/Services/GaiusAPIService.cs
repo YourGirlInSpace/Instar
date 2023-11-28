@@ -1,6 +1,8 @@
+using System.Globalization;
 using Newtonsoft.Json;
 using PaxAndromeda.Instar.Gaius;
 using System.Text;
+using Amazon.Runtime.Internal.Transform;
 
 namespace PaxAndromeda.Instar.Services;
 
@@ -117,12 +119,18 @@ public sealed class GaiusAPIService : IGaiusAPIService
         return ParseCaselogs(result);
     }
 
-    private static IEnumerable<Caselog> ParseCaselogs(string response)
+    internal static IEnumerable<Caselog> ParseCaselogs(string response)
     {
-        // Remove the "totalCases" portion if it exists
-        if (response.Contains("totalCases", StringComparison.OrdinalIgnoreCase))
-            response = response[..(response.LastIndexOf("\"totalCases\"", StringComparison.OrdinalIgnoreCase)-1)] + "}";
+        // Remove any instances of "totalCases"
+        while (response.Contains("\"totalcases\":", StringComparison.OrdinalIgnoreCase))
+        {
+            var lineBoundaries = Utilities.GetLineBoundaries(
+                response,
+                response.IndexOf("\"totalcases\":", StringComparison.OrdinalIgnoreCase));
 
+            response = response.Remove(lineBoundaries);
+        }
+        
         if (response.Length <= 2)
             yield break;
 
