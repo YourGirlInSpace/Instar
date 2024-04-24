@@ -9,6 +9,7 @@ public enum CaselogType
     Ban,
     Kick,
     Mute,
+    Unmute,
     [EnumMember(Value = "vcmute")]
     VoiceMute,
     Softban,
